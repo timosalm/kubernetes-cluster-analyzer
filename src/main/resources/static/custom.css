@@ -1,0 +1,79 @@
+.subtitle {
+    font-size: 80%;
+    margin-top: 10px;
+    margin-left: 5px;
+    font-style: italic;
+}
+
+td {
+    vertical-align: middle !important;;
+    text-align: left !important;
+}
+
+td > :first-child {
+    margin-top: 0;
+}
+
+h4 {
+    margin-top: 0.4rem !important;
+}
+
+input, button, select, textarea {
+    border-radius: 0.5em;
+    border-width: 1px;
+    border-color: rgb(200, 200, 200);
+    border-style: solid;
+}
+
+input[type=text] {
+    width: 25em;
+}
+
+
+.center-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#charts {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#container-category-chart {
+    margin-bottom: -8em;
+    overflow: hidden;
+}
+
+#container-category-chart > div:first-child {
+    position: relative;
+    top: -3rem;
+}
+
+.chart-headline {
+    font-size: 0.8rem!important;
+    text-align: center!important;
+    font-weight: bold!important;
+    color: black!important;
+}
+
+#sbom-img {
+    width: 1.5rem;
+}
+
+#container-registry-credentials input {
+    width: 10em;
+}
+
+#registry-credentials-label {
+    color: rgb(69, 69, 69);
+    font-weight: 600;
+    font-size: .7rem;
+    line-height: 1.2rem;
+}
+
+#container-registry-credentials > div:not(:first-child) {
+    margin-top: 0.5rem; /* Adjust the value to your desired margin */
+}

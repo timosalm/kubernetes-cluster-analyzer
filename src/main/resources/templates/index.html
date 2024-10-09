@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/@clr/ui@16.3.7/clr-ui.min.css" />
+    <link th:href="@{/custom.css}" rel="stylesheet">
+</head>
+
+<body>
+<div class="main-container">
+    <header class="header-6">
+        <div class="branding">
+            <a class="nav-link">
+                <span class="title">Kubernetes Cluster Explorer</span>
+            </a>
+        </div>
+    </header>
+    <div class="content-container">
+        <div class="content-area center-content">
+            <div class="clr-row">
+                <div class="clr-col">
+                    <div class="card">
+                        <div class="card-header">Run Analysis</div>
+                        <form action="#" th:action="@{/analysis}" method="post" class="clr-form clr-form-horizontal" enctype="multipart/form-data">
+                        <div class="card-block">
+                            <span class="clr-form-control clr-row">
+                                <label class="clr-control-label" for="input-kubeconfig">Select kubeconfig file</label>
+                                <input class="clr-input" type="file" name="kubeconfig" id="input-kubeconfig"  required />
+                            </span>
+                            <span class="clr-form-control clr-row">
+                                <label class="clr-control-label" for="input-namespaces">(Optional) Namespaces</label>
+                                <input class="clr-input" type="text" name="namespaces" id="input-namespaces" />
+                            </span>
+                            <span class="clr-form-control clr-row">
+                                <label class="clr-control-label" for="input-exclude-namespaces">(Optional) Excluded namespaces</label>
+                                <input class="clr-input" type="text" name="excludeNamespaces" id="input-exclude-namespaces" th:value="${analyzerConfig.excludedNamespaces}" />
+                            </span>
+                            <div id="registry-credentials" class="clr-form-control clr-row">
+                                <p class="clr-control-label" id="registry-credentials-label">(Optional) Registry credentials</p>
+                                <div id="container-registry-credentials">
+                                    <div>
+                                        <div>
+                                            <input class="clr-input" type="text" name="registryCredentials[0].server" placeholder="URL without http(s) prefix" oninput="checkForNewRow(event)" />
+                                            <input class="clr-input" type="text" name="registryCredentials[0].username" placeholder="Username" oninput="checkForNewRow(event)" />
+                                            <input class="clr-input" type="password" name="registryCredentials[0].password" placeholder="Password" oninput="checkForNewRow(event)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Analyze</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function addRow() {
+        let container = document.getElementById("container-registry-credentials");
+        let index = container.children.length;
+        let newRow = document.createElement("div");
+        newRow.innerHTML = `
+                <div>
+                    <input class="clr-input" type="text" name="registryCredentials[${index}].server" placeholder="URL without http(s) prefix" oninput="checkForNewRow(event)"/>
+                    <input class="clr-input" type="text" name="registryCredentials[${index}].username" placeholder="Username" oninput="checkForNewRow(event)"/>
+                    <input class="clr-input" type="password" name="registryCredentials[${index}].password" placeholder="Password" oninput="checkForNewRow(event)"/>
+                </div>
+            `;
+        container.appendChild(newRow);
+    }
+
+    function checkForNewRow(event) {
+        const lastRow = document.querySelector("#container-registry-credentials > div:last-child");
+        const inputs = lastRow.querySelectorAll("input");
+        const allFilled = Array.from(inputs).every(input => input.value.trim() !== "");
+
+        if (allFilled) {
+            addRow();
+        }
+    }
+</script>
+</body>
+</html>

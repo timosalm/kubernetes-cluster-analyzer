@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/@clr/ui@16.3.7/clr-ui.min.css" />
+    <link th:href="@{/custom.css}" rel="stylesheet">
+</head>
+
+<body>
+<div class="main-container">
+    <header class="header-6">
+        <div class="branding">
+            <a class="nav-link">
+                <span class="title">Kubernetes Cluster Explorer</span>
+            </a>
+        </div>
+    </header>
+    <div class="content-container">
+        <div class="content-area">
+            <div class="clr-row">
+                <div class="clr-col">
+                    <div class="card">
+                        <div class="card-block">
+                            <div th:if="${analysis != null}">
+                                <h1 th:text="${'Analysis for context ' + analysis.kubernetesContext  }"></h1>
+                                <h4 th:text="${'Analysis ID: ' + analysis.id}"></h4>
+                                <h4 th:text="${'Scan finished at ' + #temporals.format(analysis.createdAt, 'dd-MM-yyyy HH:mm')}"></h4>
+
+                                <div id="charts">
+                                    <div>
+                                        <p class="chart-headline">Detected Container Categories</p>
+                                        <div id="container-category-chart"></div>
+                                    </div>
+                                </div>
+
+
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Namespace</th>
+                                        <th>Name</th>
+                                        <th>Images</th>
+                                        <th>Category</th>
+                                        <th>Software</th>
+                                        <th>Type</th>
+                                        <th>Helm</th>
+                                        <th>PVCs</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody th:each="workload : ${analysis.workloads}" th:remove="tag">
+                                    <tr>
+                                        <td th:text="${workload.namespace}">Namespace</td>
+                                        <td th:text="${workload.name}">Name</td>
+                                        <td>
+                                            <div th:each="container : ${workload.containers}" th:remove="tag">
+                                                <div>
+                                                    <span th:text="${container.image}">Container image</span>
+                                                    <a th:href="@{/analysis/{id}/workloads/{workloadId}/containers/{containerId}/sbom(id=${analysis.id},workloadId=${workload.id},containerId=${container.id})}"
+                                                       th:target="_blank" th:if="${container.sBom != null}">
+                                                        <img th:src="@{/images/sbom.png}" id="sbom-img" alt="SBOM Download">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div th:each="container : ${workload.containers}" th:remove="tag">
+                                                <div th:each="classification : ${container.classifications}" th:remove="tag">
+                                                    <div th:text="${classification.type} + ' - ' + ${classification.subType}">Container image category</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div th:each="container : ${workload.containers}" th:remove="tag">
+                                                <div th:each="classification : ${container.classifications}" th:remove="tag">
+                                                    <div th:text="${classification.technology}">Container image technology</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td th:text="${workload.type}">Type</td>
+                                        <td th:text="${workload.hasPvc} ? 'Yes' : 'No'">PVC</td>
+                                        <td th:text="${workload.managedByHelm} ? 'Yes' : 'No'">PVC</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" th:inline="javascript">
+
+    // Load the Visualization API and the corechart package.
+    google.charts.load('current', {'packages':['corechart']});
+
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.charts.setOnLoadCallback(drawChart);
+
+    // Callback that creates and populates a data table,
+    // instantiates the pie chart, passes in the data and
+    // draws it.
+    function drawChart() {
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Category');
+        data.addColumn('number', 'Containers');
+        data.addRows([[${containerCategoriesChartData}]]);
+
+        // Set chart options
+        var options = {
+            'width':500,
+            'height':500,
+            'legend': 'none',
+            'pieSliceText': 'label',
+            'backgroundColor': 'transparent'
+        };
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.PieChart(document.getElementById('container-category-chart'));
+        chart.draw(data, options);
+    }
+</script>
+</body>
+</html>

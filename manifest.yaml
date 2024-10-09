@@ -1,0 +1,9 @@
+---
+applications:
+  - name: k8s-cluster-analyzer
+    path: target/k8s-cluster-analyzer-1.0.0.jar
+    buildpacks:
+      - java-online
+    instances: 1
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+ } }'
