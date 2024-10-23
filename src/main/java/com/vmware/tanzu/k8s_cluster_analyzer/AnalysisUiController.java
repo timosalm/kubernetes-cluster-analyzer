@@ -9,15 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static com.vmware.tanzu.k8s_cluster_analyzer.AnalyzerUtils.toList;
 
 @Controller
 public class AnalysisUiController {
@@ -32,18 +28,17 @@ public class AnalysisUiController {
 
     @GetMapping
     public String fetchUI(Model model) {
+        model.addAttribute("analysisFormData", new AnalysisFormData());
         model.addAttribute("analyzerConfig", analyzerConfig);
         return "index";
     }
 
     @PostMapping("/analysis")
-    public String analyze(@RequestParam("kubeconfig") MultipartFile kubeConfig,
-                          @RequestParam(required = false, defaultValue = "") String namespaces,
-                          @RequestParam(required = false, defaultValue = "") String excludeNamespaces,
-                          @RequestParam(required = false, name = "registryCredentialss") List<RegistryCredentials>  registryCredentials)
+    public String analyze(@ModelAttribute AnalysisFormData analysisFormData)
             throws IOException, ApiException {
-        System.out.println(registryCredentials.size());
-        var analysis = analysisService.analyze(kubeConfig.getResource(), toList(namespaces), toList(excludeNamespaces));
+        var analysis = analysisService.analyze(analysisFormData.getKubeConfig().getResource(),
+                analysisFormData.namespacesAsList(), analysisFormData.getExcludeNamespacesAsList(),
+                analysisFormData.getValidatedRegistryCredentials(), analysisFormData.getUseSBom());
         return "redirect:analysis/%s".formatted(analysis.getId());
     }
 

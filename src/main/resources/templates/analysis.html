@@ -12,8 +12,13 @@
 <div class="main-container">
     <header class="header-6">
         <div class="branding">
-            <a class="nav-link">
+            <a class="nav-link" th:href="@{/}">
                 <span class="title">Kubernetes Cluster Explorer</span>
+            </a>
+        </div>
+        <div class="header-nav">
+            <a th:href="@{/}" class="nav-link">
+                <span class="nav-text">Home</span>
             </a>
         </div>
     </header>
@@ -26,7 +31,8 @@
                             <div th:if="${analysis != null}">
                                 <h1 th:text="${'Analysis for context ' + analysis.kubernetesContext  }"></h1>
                                 <h4 th:text="${'Analysis ID: ' + analysis.id}"></h4>
-                                <h4 th:text="${'Scan finished at ' + #temporals.format(analysis.createdAt, 'dd-MM-yyyy HH:mm')}"></h4>
+                                <h4 th:text="${'Scan started at ' + #temporals.format(analysis.createdAt, 'dd-MM-yyyy HH:mm')}"></h4>
+                                <h4 th:text="${'Status: ' + analysis.status}"></h4>
 
                                 <div id="charts">
                                     <div>
@@ -41,18 +47,22 @@
                                     <tr>
                                         <th>Namespace</th>
                                         <th>Name</th>
+                                        <th>Type</th>
                                         <th>Images</th>
+                                        <th>Classification</th>
                                         <th>Category</th>
                                         <th>Software</th>
-                                        <th>Type</th>
+                                        <th>CVEs</th>
                                         <th>Helm</th>
                                         <th>PVCs</th>
+                                        <th>Compatibility<br/>with Cloud Foundry</th>
                                     </tr>
                                     </thead>
                                     <tbody th:each="workload : ${analysis.workloads}" th:remove="tag">
                                     <tr>
                                         <td th:text="${workload.namespace}">Namespace</td>
                                         <td th:text="${workload.name}">Name</td>
+                                        <td th:text="${workload.type}">Type</td>
                                         <td>
                                             <div th:each="container : ${workload.containers}" th:remove="tag">
                                                 <div>
@@ -66,6 +76,14 @@
                                         </td>
                                         <td>
                                             <div th:each="container : ${workload.containers}" th:remove="tag">
+                                                <div th:text="${container.status}">Classification status</div>
+                                                <div id="classification-tooltip" th:if="${container.errorMessage != null}" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                                    <span class="tooltiptext" th:text="${container.errorMessage}">Error message</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div th:each="container : ${workload.containers}" th:remove="tag">
                                                 <div th:each="classification : ${container.classifications}" th:remove="tag">
                                                     <div th:text="${classification.type} + ' - ' + ${classification.subType}">Container image category</div>
                                                 </div>
@@ -74,13 +92,26 @@
                                         <td>
                                             <div th:each="container : ${workload.containers}" th:remove="tag">
                                                 <div th:each="classification : ${container.classifications}" th:remove="tag">
-                                                    <div th:text="${classification.technology}">Container image technology</div>
+                                                    <div th:if="${classification.technology != null}" th:text="${classification.technology} + ' ' + (${classification.technologyVersion} ?: '')">Container image technology</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td th:text="${workload.type}">Type</td>
+                                        <td>
+                                            <div th:each="container : ${workload.containers}" th:remove="tag">
+                                                <div th:if="${container.totalCveCount != null && container.totalCveCount > 0}"  th:text="${'Total ' + container.totalCveCount + ' (CRITICAL: ' + container.criticalCveCount + ', HIGH: ' + container.highCveCount + ')'}">Container CVE Count</div>
+                                            </div>
+                                        </td>
                                         <td th:text="${workload.hasPvc} ? 'Yes' : 'No'">PVC</td>
                                         <td th:text="${workload.managedByHelm} ? 'Yes' : 'No'">PVC</td>
+                                        <td class="cf-compatibility-cell">
+                                            <div th:each="container : ${workload.containers}" th:remove="tag">
+                                                <div th:each="classification : ${container.classifications}" th:remove="tag">
+                                                    <a th:href="${classification.documentation}" th:target="_blank">
+                                                        <div th:text="${classification.fit}">CF fit</div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                 </table>
                             </div>

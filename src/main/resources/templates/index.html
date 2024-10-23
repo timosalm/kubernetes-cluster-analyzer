@@ -12,8 +12,13 @@
 <div class="main-container">
     <header class="header-6">
         <div class="branding">
-            <a class="nav-link">
+            <a class="nav-link" th:href="@{/}">
                 <span class="title">Kubernetes Cluster Explorer</span>
+            </a>
+        </div>
+        <div class="header-nav">
+            <a th:href="@{/}" class="nav-link">
+                <span class="nav-text">Home</span>
             </a>
         </div>
     </header>
@@ -23,11 +28,11 @@
                 <div class="clr-col">
                     <div class="card">
                         <div class="card-header">Run Analysis</div>
-                        <form action="#" th:action="@{/analysis}" method="post" class="clr-form clr-form-horizontal" enctype="multipart/form-data">
+                        <form action="#" th:action="@{/analysis}" th:object="${analysisFormData}" method="post" class="clr-form clr-form-horizontal" enctype="multipart/form-data">
                         <div class="card-block">
                             <span class="clr-form-control clr-row">
                                 <label class="clr-control-label" for="input-kubeconfig">Select kubeconfig file</label>
-                                <input class="clr-input" type="file" name="kubeconfig" id="input-kubeconfig"  required />
+                                <input class="clr-input" type="file" name = "kubeConfig" id="input-kubeconfig"  required />
                             </span>
                             <span class="clr-form-control clr-row">
                                 <label class="clr-control-label" for="input-namespaces">(Optional) Namespaces</label>
@@ -49,6 +54,13 @@
                                     </div>
                                 </div>
                             </div>
+                            <span class="clr-form-control clr-row clr-checkbox-wrapper">
+                                <input class="clr-input" type="checkbox" name="useSBom" id="checkbox-sbom-classification" checked />
+                                <label class="clr-control-label" for="checkbox-sbom-classification">Classify based on SBOM</label>
+                                <div id="sbom-classification-tooltip" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                    <span class="tooltiptext">If it's not possible to classify workloads by container image, a SBOM will be generated and analyzed. Pulling the image for SBOM generation takes some time, and therefore it's recommended to only enable it for small clusters or specific namespaces.</span>
+                                </div>
+                            </span>
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary">Analyze</button>

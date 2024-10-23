@@ -9,12 +9,9 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import org.cyclonedx.exception.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -55,50 +52,25 @@ public class Workload {
         DEPLOYMENT, STATEFUL_SET
     }
 
-    public void analyze(AnalyzerConfig analyzerConfig) {
+    public void classifyByContainerImageNames(AnalyzerConfig analyzerConfig) {
+        log.info("Classification of containers of workload {}/{}", namespace, name);
         containers.forEach(container -> {
-            var classification = classify(container.getName(), analyzerConfig.getContainerNameClassifiers());
+            var classification = classify(container.getImage(), analyzerConfig.getContainerNameClassifiers());
             container.addClassification(classification);
-        });
-
-        getUnclassifiedContainers().forEach(container -> {
-            try {
-                var sBom = AnalyzerUtils.generateSBom(container.getImage());
-                container.setSBom(sBom);
-                var classifications = classifySBom(sBom, analyzerConfig.getSbomClassifiers());
-                container.setClassifications(classifications);
-            } catch (IOException | InterruptedException | ParseException e) {
-                log.warn("Unable to generate SBom for container %s".formatted(container.getImage()), e);
-            }
         });
     }
 
-    private Classification classify(String containerName, List<Classifier> classifiers) {
+    private Classification classify(String containerImage, List<Classifier> classifiers) {
         for (Classifier classifier : classifiers) {
-            if (Pattern.compile(classifier.regex()).matcher(containerName).matches()) {
+            if (Pattern.compile(classifier.regex()).matcher(containerImage).matches()) {
                 return Classification.from(classifier);
             }
         }
         return null;
     }
 
-    private List<Classification> classifySBom(String sBom, List<Classifier> classifiers) throws ParseException {
-        var relevantComponents = AnalyzerUtils.getDirectDependencies(sBom);
-        var matchedClassifiers = new ArrayList<Classifier>();
-        relevantComponents.forEach(component -> {
-            for (Classifier classifier : classifiers) {
-                if (Pattern.compile(classifier.regex()).matcher(component.getName()).matches()) {
-                    if (!matchedClassifiers.contains(classifier)) {
-                        matchedClassifiers.add(classifier);
-                    }
-                }
-            }
-        });
-        return matchedClassifiers.stream().map(Classification::from).toList();
-    }
-
-    private List<Container> getUnclassifiedContainers() {
-        return containers.stream().filter(c -> c.getClassifications().isEmpty()).toList();
+    public List<Container> getUnclassifiedContainers() {
+        return containers.stream().filter(c -> c.getStatus() != Classification.Status.COMPLETED).toList();
     }
 
     public static Workload from(V1Deployment deployment) {

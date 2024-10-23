@@ -8,6 +8,10 @@ import java.util.UUID;
 @Entity
 public class Classification {
 
+    public enum Status {
+        PENDING, COMPLETED, FAILED
+    }
+
     @Id
     private UUID id;
     private String type;
@@ -15,22 +19,28 @@ public class Classification {
     private String technology;
     private int fit;
     private String documentation;
+    private String technologyVersion;
 
-    public Classification(String type, String subType, String technology, int fit, String documentation) {
+    public Classification(String type, String subType, String technology, int fit, String documentation, String technologyVersion) {
         this.id = UUID.randomUUID();
         this.type = type;
         this.subType = subType;
         this.technology = technology;
         this.fit = fit;
         this.documentation = documentation;
+        this.technologyVersion = technologyVersion;
     }
 
     public Classification() {
     }
 
     public static Classification from(Classifier classifier) {
+        return from(classifier, null);
+    }
+
+    public static Classification from(Classifier classifier, String technologyVersion) {
         return new Classification(classifier.type(), classifier.subType(), classifier.technology(), classifier.fit(),
-                classifier.documentation());
+                classifier.documentation(), technologyVersion);
     }
 
     public UUID getId() {
@@ -80,4 +90,13 @@ public class Classification {
     public void setDocumentation(String documentation) {
         this.documentation = documentation;
     }
+
+    public String getTechnologyVersion() {
+        return technologyVersion;
+    }
+
+    public void setTechnologyVersion(String technologyVersion) {
+        this.technologyVersion = technologyVersion;
+    }
+
 }

@@ -77,3 +77,69 @@ input[type=text] {
 #container-registry-credentials > div:not(:first-child) {
     margin-top: 0.5rem; /* Adjust the value to your desired margin */
 }
+
+#error-page .card {
+    background: none;
+    border: none;
+    box-shadow: none;
+    text-align: center;
+}
+
+.error-text {
+    color: rgb(106, 122, 129)!important;
+    font-size: 2rem !important;
+    font-weight: 100 !important;
+}
+
+.cf-compatibility-cell {
+    text-align:center!important
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.tooltip svg {
+    width: 2em;
+    fill: rgb(0, 121, 173);
+    margin-bottom: -0.5em;
+}
+
+.tooltiptext {
+    visibility: hidden;
+    width: 300px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 9999;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -150px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+.clr-checkbox-wrapper .clr-control-label {
+    font-weight: bold;
+}

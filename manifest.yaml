@@ -4,6 +4,9 @@ applications:
     path: target/k8s-cluster-analyzer-1.0.0.jar
     buildpacks:
       - java-online
+    #memory: 5G
+    disk_quota: 6G
     instances: 1
     env:
       JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+ } }'
+      LOG_LEVEL: debug

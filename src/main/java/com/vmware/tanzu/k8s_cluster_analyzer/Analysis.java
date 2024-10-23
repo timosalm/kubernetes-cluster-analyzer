@@ -61,4 +61,12 @@ public class Analysis {
     public void setKubernetesContext(String kubernetesContext) {
         this.kubernetesContext = kubernetesContext;
     }
+
+    public String getStatus() {
+        var hasPendingClassifications = workloads.stream()
+                .flatMap(workload -> workload.getContainers().stream())
+                .anyMatch(container -> container.getStatus() == Classification.Status.PENDING);
+        if (hasPendingClassifications) return "Pending";
+        return "Completed";
+    }
 }

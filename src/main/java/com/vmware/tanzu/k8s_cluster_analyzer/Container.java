@@ -6,14 +6,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-public class Container {
+public class Container implements Serializable {
 
     @Id
     private UUID id;
@@ -23,11 +23,17 @@ public class Container {
     private List<Classification> classifications = new ArrayList<>();
     @Lob
     private String sBom;
+    private Integer totalCveCount;
+    private Integer criticalCveCount;
+    private Integer highCveCount;
+    private Classification.Status status;
+    private String errorMessage;
 
     public Container(String name, String image) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.image = image;
+        this.status = Classification.Status.PENDING;
     }
 
     public Container() {
@@ -73,6 +79,7 @@ public class Container {
     public void addClassification(Classification classification) {
         if (classification != null) {
             this.classifications.add(classification);
+            status = Classification.Status.COMPLETED;
         }
     }
 
@@ -82,5 +89,57 @@ public class Container {
 
     public void setSBom(String sBom) {
         this.sBom = sBom;
+    }
+
+    public Integer getTotalCveCount() {
+        return totalCveCount;
+    }
+
+    public void setTotalCveCount(Integer totalCveCount) {
+        this.totalCveCount = totalCveCount;
+    }
+
+    public Integer getCriticalCveCount() {
+        return criticalCveCount;
+    }
+
+    public void setCriticalCveCount(Integer criticalCveCount) {
+        this.criticalCveCount = criticalCveCount;
+    }
+
+    public Integer getHighCveCount() {
+        return highCveCount;
+    }
+
+    public void setHighCveCount(Integer highCveCount) {
+        this.highCveCount = highCveCount;
+    }
+
+    public Classification.Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Classification.Status status) {
+        this.status = status;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void addAll(List<Classification> classifications) {
+        classifications.forEach(this::addClassification);
+    }
+
+    public String getsBom() {
+        return sBom;
+    }
+
+    public void setsBom(String sBom) {
+        this.sBom = sBom;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

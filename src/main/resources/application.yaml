@@ -2,12 +2,53 @@ spring:
   application.name: k8s-cluster-analyzer
   threads.virtual.enabled: true
   jpa:
-    show-sql: true
     generate-ddl: true
 
 analyzer:
   excluded-namespaces: kube-node-lease,kube-public,kube-system
   sbom-classifiers:
+  - name: "dotnetcore"
+    type: "Programming Language"
+    sub-type: "C#"
+    technology: ".NET Core"
+    regex: 'Microsoft\.NETCore\.App\.Runtime\..*'
+    fit: 1
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/dotnet-core-index.html"
+  - name: "python"
+    type: "Programming Language"
+    sub-type: "Python"
+    technology: "Flask"
+    regex: "Flask"
+    fit: 1
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/python-index.html"
+  - name: "react"
+    type: "Programming Language"
+    sub-type: "JavaScript"
+    technology: "React"
+    regex: "react"
+    fit: 1
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
+  - name: "express"
+    type: "Programming Language"
+    sub-type: "JavaScript"
+    technology: "Express"
+    regex: "express"
+    fit: 1
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
+  - name: "node"
+    type: "Programming Language"
+    sub-type: "JavaScript"
+    technology: "Node"
+    regex: "node"
+    fit: 1
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
+  - name: "npm"
+    type: "Programming Language"
+    sub-type: "JavaScript"
+    technology: "npm"
+    regex: "npm"
+    fit: 1
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
   - name: "golang"
     type: "Programming Language"
     sub-type: "GO"

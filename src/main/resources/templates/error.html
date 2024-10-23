@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/@clr/ui@16.3.7/clr-ui.min.css" />
+    <link th:href="@{/custom.css}" rel="stylesheet">
+</head>
+
+<body>
+<div class="main-container" id="error-page">
+    <header class="header-6">
+        <div class="branding">
+            <a class="nav-link" th:href="@{/}">
+                <span class="title">Kubernetes Cluster Explorer</span>
+            </a>
+        </div>
+        <div class="header-nav">
+            <a th:href="@{/}" class="nav-link">
+                <span class="nav-text">Home</span>
+            </a>
+        </div>
+    </header>
+    <div class="content-container">
+        <div class="content-area center-content">
+            <div class="clr-row">
+                <div class="clr-col">
+                    <div class="card">
+                        <div class="card-block">
+                            <p class="error-text" th:text="${status}">Error status code</p>
+                            <p class="error-text"th:text="${error}">Error message</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

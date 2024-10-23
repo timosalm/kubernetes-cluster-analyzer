@@ -3,8 +3,9 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-src/main/resources/trivy
-src/main/resources/trivy-mac-arm
+src/main/resources/trivy/
+private/
+.DS_Store
 
 ### STS ###
 .apt_generated
