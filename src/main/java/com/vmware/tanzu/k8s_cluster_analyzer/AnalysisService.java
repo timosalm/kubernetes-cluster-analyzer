@@ -9,8 +9,6 @@ import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
 import org.cyclonedx.exception.ParseException;
-import org.cyclonedx.model.Bom;
-import org.cyclonedx.model.vulnerability.Vulnerability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,14 +16,19 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 @Service
@@ -33,6 +36,9 @@ public class AnalysisService {
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisService.class);
 
+    private final ConcurrentHashMap<UUID, ReentrantLock> analysisLocks = new ConcurrentHashMap<>();
+
+    private final Semaphore dbConnectionPoolLock = new Semaphore(1);
     private final AnalyzerConfig analyzerConfig;
     private final AnalysisRepository analysisRepository;
     private final ContainerRepository containerRepository;
@@ -62,37 +68,38 @@ public class AnalysisService {
         log.info("Found {} workloads for analysis", workloads.size());
         workloads.forEach(workload -> {
             workload.classifyByContainerImageNames(analyzerConfig);
-            workload.getUnclassifiedContainers().forEach(container -> {
-                if (useSBom) {
-                    log.info("Published SBOM analysis event for workload {}/{} container {}",
-                            workload.getNamespace(), workload.getName(), container.getImage());
-                    publisher.publishEvent(new ContainerSBomAnalysisEvent(workload, container, registryCredentials));
-                } else {
-                    container.setStatus(Classification.Status.COMPLETED);
-                }
-            });
+            if (!useSBom) {
+                workload.getContainers().forEach(container -> container.setStatus(Classification.Status.COMPLETED));
+            }
         });
-
         var analysis = new Analysis(config.getCurrentContext(), workloads);
         analysisRepository.save(analysis);
+        log.info("Analysis created with id {} for context {}", analysis.getId(), analysis.getKubernetesContext());
+
+        if (useSBom) {
+            workloads.forEach(workload -> {
+                workload.getUnclassifiedContainers().forEach(container -> {
+                    log.info("Published SBOM analysis event for workload {}/{} container {}",
+                            workload.getNamespace(), workload.getName(), container.getImage());
+                    publisher.publishEvent(new ContainerSBomAnalysisEvent(analysis, workload, container, registryCredentials));
+                });
+            });
+        }
         return analysis;
     }
 
     @Async
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
     @EventListener
-    protected void onContainerSBomAnalysisEvent(ContainerSBomAnalysisEvent event) {
+    protected void onContainerSBomAnalysisEvent(ContainerSBomAnalysisEvent event) throws InterruptedException {
         var container = event.getContainer();
-        var workload = event.getSource();
+        var workload = event.getWorkload();
         log.info("Received SBOM analysis event for workload {}/{} container {}", workload.getNamespace(),
                 workload.getName(), container.getImage());
         String sBom = null;
         try {
-            log.info("SBOM generation started for workload {}/{} container {}", workload.getNamespace(),
-                    workload.getName(), container.getImage());
             sBom = AnalyzerUtils.generateSBom(container.getImage(), event.getRegistryCredentials());
-            log.info("SBOM generation finished for workload {}/{} container {}", workload.getNamespace(),
-                    workload.getName(), container.getImage());
-            container.setSBom(sBom);
         } catch (IOException | InterruptedException |TrivyException e) {
             log.warn("SBOM generation failed for workload {}/{} container {}", workload.getNamespace(),
                     workload.getName(), container.getImage());
@@ -100,16 +107,13 @@ public class AnalysisService {
             container.setErrorMessage("SBOM generation failed");
         }
 
-        if (sBom != null && !sBom.isEmpty()) {
-            log.info("Analysis based on SBOM for workload started {}/{} container {}", workload.getNamespace(),
-                    workload.getName(), container.getImage());
+        if (sBom != null) {
+            container.setSBom(sBom);
             try {
                 AnalyzerUtils.analyzeSBom(container, analyzerConfig.getSbomClassifiers());
                 log.info("Analysis based on SBOM for workload finished {}/{} container {}", workload.getNamespace(),
                         workload.getName(), container.getImage());
-                if (container.getStatus() == Classification.Status.PENDING) {
-                    container.setStatus(Classification.Status.COMPLETED);
-                }
+                container.setStatus(Classification.Status.COMPLETED);
             } catch (ParseException e) {
                 log.warn("Unable to parse SBOM for workload {}/{} container {}", workload.getNamespace(), workload.getName(),
                         container.getImage());
@@ -117,10 +121,17 @@ public class AnalysisService {
                 container.setErrorMessage("Unable to parse SBOM");
             }
         }
-        containerRepository.save(container);
+
+        // Fix number of virtual threads vs available db connection pool issues
+        try {
+            dbConnectionPoolLock.acquire();
+            containerRepository.save(container);
+        } finally {
+            dbConnectionPoolLock.release();
+        }
     }
 
-private List<Workload> fetchWorkloads(ApiClient kubernetesClient, List<String> namespaces, List<String> excludeNamespaces)
+    private List<Workload> fetchWorkloads(ApiClient kubernetesClient, List<String> namespaces, List<String> excludeNamespaces)
             throws ApiException {
         List<V1Deployment> deployments;
         List<V1StatefulSet> statefulSets;

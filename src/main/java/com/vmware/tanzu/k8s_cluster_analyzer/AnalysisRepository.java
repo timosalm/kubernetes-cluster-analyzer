@@ -7,5 +7,4 @@ import java.util.UUID;
 
 @Repository
 public interface AnalysisRepository extends ListCrudRepository<Analysis, UUID> {
-
 }

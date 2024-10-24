@@ -6,17 +6,23 @@ import java.util.List;
 
 public class ContainerSBomAnalysisEvent extends ApplicationEvent {
 
+    private final Workload workload;
     private final Container container;
     private final List<RegistryCredentials> registryCredentials;
 
-    public ContainerSBomAnalysisEvent(Workload source, Container container, List<RegistryCredentials> registryCredentials) {
-        super(source);
+    public ContainerSBomAnalysisEvent(Analysis analysis, Workload workload, Container container, List<RegistryCredentials> registryCredentials) {
+        super(analysis);
+        this.workload = workload;
         this.container = container;
         this.registryCredentials = registryCredentials;
     }
 
-    public Workload getSource() {
-        return (Workload) super.getSource();
+    public Analysis getSource() {
+        return (Analysis) super.getSource();
+    }
+
+    public Workload getWorkload() {
+        return this.workload;
     }
 
     public Container getContainer() {
