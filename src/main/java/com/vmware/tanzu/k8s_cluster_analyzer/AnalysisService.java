@@ -99,7 +99,11 @@ public class AnalysisService {
         String sBom = null;
         try {
             trivyProcessLock.acquire();
+            log.info("Starting to create SBOM for workload {}/{} container {}", workload.getNamespace(),
+                    workload.getName(), container.getImage());
             sBom = AnalyzerUtils.generateSBom(container.getImage(), event.getRegistryCredentials());
+            log.info("SBOM creation finished for workload {}/{} container {}", workload.getNamespace(),
+                    workload.getName(), container.getImage());
         } catch (IOException | InterruptedException |TrivyException e) {
             log.warn("SBOM generation failed for workload {}/{} container {}", workload.getNamespace(),
                     workload.getName(), container.getImage());
