@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.vmware.tanzu</groupId>
 	<artifactId>k8s-cluster-analyzer</artifactId>
-	<version>${version}</version>
+	<version>1.0.0</version>
 	<name>k8s-cluster-analyzer</name>
 	<description>Application that analyses the workloads running in Kubernetes clusters</description>
 	<url/>
