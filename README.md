@@ -15,8 +15,8 @@ Neither the kubeconfig, nor the registry credentials will be stored!
 
 Download the latest trivy vulnerability databases.
 ```
-(cd src/main/resources/trivy && trivy image --cache-dir . --download-db-only)
-(cd src/main/resources/trivy && trivy image --cache-dir . --download-java-db-only)
+(cd src/main/resources/trivy && ./trivy image --cache-dir . --download-db-only)
+(cd src/main/resources/trivy && ./trivy image --cache-dir . --download-java-db-only)
 ```
 
 ## Run the application locally
