@@ -39,6 +39,7 @@ public class AnalyzerUtils {
         log.debug(trivyCommand);
 
         var processBuilder = new ProcessBuilder();
+        processBuilder.redirectErrorStream(true);
         processBuilder.command("sh", "-c", trivyCommand);
         var process = processBuilder.start();
         var returnCode = process.waitFor();

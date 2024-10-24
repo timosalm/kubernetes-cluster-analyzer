@@ -36,8 +36,7 @@ public class AnalysisService {
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisService.class);
 
-    private final ConcurrentHashMap<UUID, ReentrantLock> analysisLocks = new ConcurrentHashMap<>();
-
+    private final Semaphore trivyProcessLock = new Semaphore(5);
     private final Semaphore dbConnectionPoolLock = new Semaphore(1);
     private final AnalyzerConfig analyzerConfig;
     private final AnalysisRepository analysisRepository;
@@ -110,6 +109,7 @@ public class AnalysisService {
         if (sBom != null) {
             container.setSBom(sBom);
             try {
+                trivyProcessLock.acquire();
                 AnalyzerUtils.analyzeSBom(container, analyzerConfig.getSbomClassifiers());
                 log.info("Analysis based on SBOM for workload finished {}/{} container {}", workload.getNamespace(),
                         workload.getName(), container.getImage());
@@ -119,6 +119,8 @@ public class AnalysisService {
                         container.getImage());
                 container.setStatus(Classification.Status.FAILED);
                 container.setErrorMessage("Unable to parse SBOM");
+            } finally {
+                trivyProcessLock.release();
             }
         }
 
