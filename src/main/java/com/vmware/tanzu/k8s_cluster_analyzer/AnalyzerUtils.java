@@ -13,6 +13,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class AnalyzerUtils {
 
@@ -29,34 +31,66 @@ public class AnalyzerUtils {
         var resultFile = File.createTempFile("trivy-results", ".json");
         resultFile.deleteOnExit();
 
-        var trivyExecutable = new ClassPathResource(isMacOs() ? "trivy/trivy-mac-arm" : "trivy/trivy").getFile();
-
-        var credentialsPrefix = registryCredentials.stream().filter(c -> containerImage.startsWith(c.getServer()))
-                .map(c -> "TRIVY_USERNAME=%s TRIVY_PASSWORD=%s ".formatted(c.getUsername(), c.getPassword()))
-                .findFirst().orElse("");
-        var trivyCommand = "%s%s image --cache-dir %s --skip-db-update --skip-java-db-update --skip-check-update --format cyclonedx --scanners vuln --output %s --timeout 10m0s %s"
-                .formatted(credentialsPrefix, trivyExecutable.getAbsolutePath(), trivyExecutable.getParent(), resultFile.getAbsolutePath(), containerImage);
-        log.debug(trivyCommand);
-
-        var processBuilder = new ProcessBuilder();
-        processBuilder.redirectErrorStream(true);
-        processBuilder.command("sh", "-c", trivyCommand);
-        var process = processBuilder.start();
-        var returnCode = process.waitFor();
+       var process =  runTrivyProcess(containerImage, registryCredentials, resultFile);
+       var returnCode = process.waitFor();
 
         String sbom;
         if (returnCode == 0) {
             sbom = Files.readString(resultFile.toPath(), StandardCharsets.UTF_8);
         } else {
-            var consoleOutput = new StringBuilder();
-            try (BufferedReader bufferedReader = process.inputReader();) {
-                bufferedReader.lines().forEach(l -> consoleOutput.append(l).append("\n"));
-            }
             resultFile.delete();
-            throw new TrivyException(returnCode, consoleOutput.toString());
+            throw new TrivyException(returnCode);
         }
         resultFile.delete();
         return sbom;
+    }
+
+    private static Process runTrivyProcess(String containerImage, List<RegistryCredentials> registryCredentials, File resultFile) throws IOException {
+        var trivyExecutable = new ClassPathResource(isMacOs() ? "trivy/trivy-mac-arm" : "trivy/trivy").getFile();
+        var command = new ArrayList<String>();
+        command.add(trivyExecutable.getPath());
+        command.add("image");
+        command.add("--cache-dir");
+        command.add(trivyExecutable.getParent());
+        command.add("--skip-db-update");
+        command.add("--skip-java-db-update");
+        command.add("--skip-check-update");
+        command.add("--format");
+        command.add("cyclonedx");
+        command.add("--scanners");
+        command.add("vuln");
+        command.add("--output");
+        command.add(resultFile.getAbsolutePath());
+        command.add(containerImage);
+
+        var processBuilder = new ProcessBuilder(command);
+        processBuilder.redirectErrorStream(true);
+
+        var  relevantRegistryCredentials = registryCredentials.stream().filter(c -> containerImage.startsWith(c.getServer())).toList();
+        if (!relevantRegistryCredentials.isEmpty()) {
+            String usernamesString = relevantRegistryCredentials.stream().map(RegistryCredentials::getUsername)
+                    .collect(Collectors.joining (","));
+            String passwordString = relevantRegistryCredentials.stream().map(RegistryCredentials::getPassword)
+                    .collect(Collectors.joining (","));
+            processBuilder.environment().put("TRIVY_USERNAME", usernamesString);
+            processBuilder.environment().put("TRIVY_PASSWORD", passwordString);
+        }
+
+        var process = processBuilder.start();
+
+        try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                log.info("Trivy log: " + line);
+                if (line.toLowerCase().contains("unable to find the specified image")) {
+                    log.warn("Terminating Trivy process due to error output");
+                    process.destroy();
+                    break;
+                }
+            }
+        }
+
+        return process;
     }
 
     public static void analyzeSBom(Container container, List<Classifier> sBomClassifiers) throws ParseException {

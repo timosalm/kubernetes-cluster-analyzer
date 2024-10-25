@@ -82,8 +82,6 @@ public class AnalysisService {
     }
 
     @Async
-    //@Transactional(propagation = Propagation.REQUIRES_NEW)
-    //@TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
     @EventListener
     protected void onContainerSBomAnalysisEvent(ContainerSBomAnalysisEvent event)  {
         var container = event.getContainer();
@@ -92,7 +90,6 @@ public class AnalysisService {
                 workload.getName(), container.getImage());
         String sBom = null;
         try {
-            //trivyProcessLock.acquire();
             log.info("Starting to create SBOM for workload {}/{} container {}", workload.getNamespace(),
                     workload.getName(), container.getImage());
             sBom = AnalyzerUtils.generateSBom(container.getImage(), event.getRegistryCredentials());
@@ -103,8 +100,6 @@ public class AnalysisService {
                     workload.getName(), container.getImage());
             container.setStatus(Classification.Status.FAILED);
             container.setErrorMessage("SBOM generation failed");
-        } finally {
-            //trivyProcessLock.release();
         }
 
         if (sBom != null) {
@@ -114,7 +109,7 @@ public class AnalysisService {
                 log.info("Analysis based on SBOM for workload finished {}/{} container {}", workload.getNamespace(),
                         workload.getName(), container.getImage());
                 container.setStatus(Classification.Status.COMPLETED);
-            } catch (ParseException e) {
+            } catch (Exception e) {
                 log.warn("Unable to parse SBOM for workload {}/{} container {}", workload.getNamespace(), workload.getName(),
                         container.getImage());
                 container.setStatus(Classification.Status.FAILED);
@@ -122,13 +117,8 @@ public class AnalysisService {
             }
         }
 
-        // Fix number of virtual threads vs available db connection pool issues
-        //try {
-         //   dbConnectionPoolLock.acquire();
-            containerRepository.save(container);
-        //} finally {
-          //  dbConnectionPoolLock.release();
-        //}
+
+        containerRepository.save(container);
     }
 
     private List<Workload> fetchWorkloads(ApiClient kubernetesClient, List<String> namespaces, List<String> excludeNamespaces)
