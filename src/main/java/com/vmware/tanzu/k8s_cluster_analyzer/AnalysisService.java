@@ -16,19 +16,13 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 @Service
@@ -91,26 +85,26 @@ public class AnalysisService {
     //@Transactional(propagation = Propagation.REQUIRES_NEW)
     //@TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
     @EventListener
-    protected void onContainerSBomAnalysisEvent(ContainerSBomAnalysisEvent event) throws InterruptedException {
+    protected void onContainerSBomAnalysisEvent(ContainerSBomAnalysisEvent event)  {
         var container = event.getContainer();
         var workload = event.getWorkload();
         log.info("Received SBOM analysis event for workload {}/{} container {}", workload.getNamespace(),
                 workload.getName(), container.getImage());
         String sBom = null;
         try {
-            trivyProcessLock.acquire();
+            //trivyProcessLock.acquire();
             log.info("Starting to create SBOM for workload {}/{} container {}", workload.getNamespace(),
                     workload.getName(), container.getImage());
             sBom = AnalyzerUtils.generateSBom(container.getImage(), event.getRegistryCredentials());
             log.info("SBOM creation finished for workload {}/{} container {}", workload.getNamespace(),
                     workload.getName(), container.getImage());
-        } catch (IOException | InterruptedException |TrivyException e) {
+        } catch (Exception e) {
             log.warn("SBOM generation failed for workload {}/{} container {}", workload.getNamespace(),
                     workload.getName(), container.getImage());
             container.setStatus(Classification.Status.FAILED);
             container.setErrorMessage("SBOM generation failed");
         } finally {
-            trivyProcessLock.release();
+            //trivyProcessLock.release();
         }
 
         if (sBom != null) {
@@ -129,12 +123,12 @@ public class AnalysisService {
         }
 
         // Fix number of virtual threads vs available db connection pool issues
-        try {
-            dbConnectionPoolLock.acquire();
+        //try {
+         //   dbConnectionPoolLock.acquire();
             containerRepository.save(container);
-        } finally {
-            dbConnectionPoolLock.release();
-        }
+        //} finally {
+          //  dbConnectionPoolLock.release();
+        //}
     }
 
     private List<Workload> fetchWorkloads(ApiClient kubernetesClient, List<String> namespaces, List<String> excludeNamespaces)

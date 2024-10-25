@@ -1,8 +1,9 @@
 spring:
   application.name: k8s-cluster-analyzer
-  threads.virtual.enabled: true
+  #threads.virtual.enabled: true
   jpa:
     generate-ddl: true
+#  task.execution.simple.concurrency-limit: 5
 
 analyzer:
   excluded-namespaces: kube-node-lease,kube-public,kube-system
@@ -344,6 +345,20 @@ analyzer:
     regex: ".*prometheus.*"
     fit: 1
     documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
+  - name: "prometheus"
+    type: "Database"
+    sub-type: "Time Series"
+    technology: "Prometheus"
+    regex: ".*blackbox-exporter.*"
+    fit: 1
+    documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
+  - name: "prometheus"
+    type: "Database"
+    sub-type: "Time Series"
+    technology: "Prometheus"
+    regex: ".*/prom/.*"
+    fit: 1
+    documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
   - name: "kairosdb"
     type: "Database"
     sub-type: "Time Series"
@@ -414,6 +429,13 @@ analyzer:
     sub-type: "Search Engine"
     technology: "Elasticsearch"
     regex: ".*elasticsearch.*"
+    fit: 1
+    documentation: "https://docs.anynines.com/docs/application-developer/a9s-search/"
+  - name: "opensearch"
+    type: "Processing"
+    sub-type: "Search Engine"
+    technology: "OpenSearch"
+    regex: ".*opensearch.*"
     fit: 1
     documentation: "https://docs.anynines.com/docs/application-developer/a9s-search/"
   - name: "solr"
@@ -785,5 +807,85 @@ analyzer:
     sub-type: "Proxy"
     technology: "Inlets"
     regex: ".*inlets.*"
+    fit: 0
+    documentation: ""
+  ### API Gateways
+  - name: "kong"
+    type: "Networking"
+    sub-type: "API Gateway"
+    technology: "Kong"
+    regex: ".*kong.*"
+    fit: 0
+    documentation: ""
+  - name: "gloo"
+    type: "Networking"
+    sub-type: "API Gateway"
+    technology: "Gloo"
+    regex: ".*gloo.*"
+    fit: 0
+    documentation: ""
+  - name: spring-cloud-gateway
+    type: "Networking"
+    sub-type: "API Gateway"
+    technology: "Spring Cloud Gateway"
+    regex: ".*spring-cloud-gateway.*"
+    fit: 0
+    documentation: ""
+  ### Kubernetes
+  - name: istio
+    type: "Kubernetes"
+    sub-type: "Networking"
+    technology: "Istio"
+    regex: ".*istio.*"
+    fit: 0
+    documentation: ""
+  - name: csi
+    type: "Kubernetes"
+    sub-type: "Container Storage"
+    technology: ""
+    regex: ".*/csi-.*"
+    fit: 0
+    documentation: ""
+  - name: smbplugin
+    type: "Kubernetes"
+    sub-type: "Container Storage"
+    technology: ""
+    regex: ".*smbplugin.*"
+    fit: 0
+    documentation: ""
+  - name: kubernetes-event-exporter
+    type: "Kubernetes"
+    sub-type: "Observability"
+    technology: "kubernetes-event-exporter"
+    regex: ".*kubernetes-event-exporter.*"
+    fit: 0
+    documentation: ""
+  - name: kuberhealthy
+    type: "Kubernetes"
+    sub-type: "Observability"
+    technology: "Kuberhealthy"
+    regex: ".*kuberhealthy.*"
+    fit: 0
+    documentation: ""
+  - name: ingress-controller
+    type: "Kubernetes"
+    sub-type: "Networking"
+    technology: "Ingress Controller"
+    regex: ".*ingress-controller.*"
+    fit: 0
+    documentation: ""
+  - name: ingress-controller
+    type: "Kubernetes"
+    sub-type: "Security"
+    technology: "Cert Manager"
+    regex: ".*cert-manager.*"
+    fit: 0
+    documentation: ""
+  ### Misc
+  - name: oauth2-proxy
+    type: "Misc"
+    sub-type: "Security"
+    technology: "OAuth2 Proxy"
+    regex: ".*oauth2-proxy.*"
     fit: 0
     documentation: ""
