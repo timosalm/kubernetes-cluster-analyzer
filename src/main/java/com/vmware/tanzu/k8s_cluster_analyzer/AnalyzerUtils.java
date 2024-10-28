@@ -73,10 +73,9 @@ public class AnalyzerUtils {
     public static List<Classification> classifySBom(String sBom, List<Classifier> classifiers) throws ParseException {
         var parsedSBom = new JsonParser().parse(sBom.getBytes(StandardCharsets.UTF_8));
 
-        var relevantComponents = AnalyzerUtils.getDirectDependencies(parsedSBom);
         var matchedClassifiers = new ArrayList<Classifier>();
         var classifications = new ArrayList<Classification>();
-        relevantComponents.forEach(component -> {
+        parsedSBom.getComponents().forEach(component -> {
             for (Classifier classifier : classifiers) {
                 if (Pattern.compile(classifier.regex()).matcher(component.getName()).matches()) {
                     if (!matchedClassifiers.contains(classifier)) {
@@ -87,14 +86,6 @@ public class AnalyzerUtils {
             }
         });
         return classifications;
-    }
-
-
-    private static List<Component> getDirectDependencies(Bom sbom) {
-        var sBomRef = sbom.getMetadata().getComponent().getBomRef();
-        var directDependencies = sbom.getDependencies().stream().filter(d -> d.getRef().equals(sBomRef))
-                .flatMap(d -> d.getDependencies().stream()).map(BomReference::getRef).toList();
-        return sbom.getComponents().stream().filter(c -> directDependencies.contains(c.getBomRef())).toList();
     }
 
     private static boolean isMacOs() {
