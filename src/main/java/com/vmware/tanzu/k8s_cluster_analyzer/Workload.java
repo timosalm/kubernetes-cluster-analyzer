@@ -53,7 +53,6 @@ public class Workload {
     }
 
     public void classifyByContainerImageNames(AnalyzerConfig analyzerConfig) {
-        log.info("Classification of containers of workload {}/{}", namespace, name);
         containers.forEach(container -> {
             var classification = classify(container.getImage(), analyzerConfig.getContainerNameClassifiers());
             container.addClassification(classification);
