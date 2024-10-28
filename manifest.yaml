@@ -9,7 +9,3 @@ applications:
     instances: 1
     env:
       JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+ } }'
-    sidecars:
-    - name: trivy-server
-      process_types: [ 'web' ]
-      command: './BOOT-INF/classes/trivy/trivy server --listen 0.0.0.0:8081'

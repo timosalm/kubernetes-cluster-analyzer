@@ -8,17 +8,12 @@ import org.cyclonedx.model.vulnerability.Vulnerability;
 import org.cyclonedx.parsers.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -27,75 +22,52 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Component
-public class AnalyzerUtils implements ApplicationContextAware {
-
-    private static String trivyServerUrl;
+public class AnalyzerUtils {
 
     private static final Logger log = LoggerFactory.getLogger(AnalyzerUtils.class);
 
-    public static String generateSBom(String containerImage, List<RegistryCredentials> registryCredentials) throws IOException, InterruptedException, TrivyException {
-        var resultFile = File.createTempFile("trivy-results", ".json");
-        resultFile.deleteOnExit();
+    public static String generateSBom(String containerImage, List<RegistryCredentials> registryCredentials) throws IOException, InterruptedException, GenerateSBomExeption {
 
-       var process =  runTrivyProcess(containerImage, registryCredentials, resultFile);
-       var returnCode = process.waitFor();
+        var  relevantRegistryCredentials = registryCredentials.stream().filter(c -> containerImage.startsWith(c.getServer())).collect(Collectors.toCollection(ArrayList::new));
+        relevantRegistryCredentials.add(new RegistryCredentials("","",""));
 
-        String sbom;
-        if (returnCode == 0) {
-            sbom = Files.readString(resultFile.toPath(), StandardCharsets.UTF_8);
-        } else {
-            resultFile.delete();
-            throw new TrivyException(returnCode);
-        }
-        resultFile.delete();
-        return sbom;
-    }
+        for (RegistryCredentials creds : relevantRegistryCredentials) {
+            var process =  runSyftProcess(containerImage, creds);
 
-    private static Process runTrivyProcess(String containerImage, List<RegistryCredentials> registryCredentials, File resultFile) throws IOException {
-        var trivyExecutable = new ClassPathResource(isMacOs() ? "trivy/trivy-mac-arm" : "trivy/trivy").getFile();
-        var command = new ArrayList<String>();
-        command.add(trivyExecutable.getPath());
-        command.add("image");
-        command.add("--server");
-        command.add(trivyServerUrl);
-        command.add("--format");
-        command.add("cyclonedx");
-        command.add("--scanners");
-        command.add("vuln");
-        command.add("--output");
-        command.add(resultFile.getAbsolutePath());
-        if (log.isDebugEnabled()) command.add("--debug");
-        command.add(containerImage);
-
-        var processBuilder = new ProcessBuilder(command);
-        processBuilder.redirectErrorStream(true);
-
-        var  relevantRegistryCredentials = registryCredentials.stream().filter(c -> containerImage.startsWith(c.getServer())).toList();
-        if (!relevantRegistryCredentials.isEmpty()) {
-            String usernamesString = relevantRegistryCredentials.stream().map(RegistryCredentials::getUsername)
-                    .collect(Collectors.joining (","));
-            String passwordString = relevantRegistryCredentials.stream().map(RegistryCredentials::getPassword)
-                    .collect(Collectors.joining (","));
-            processBuilder.environment().put("TRIVY_USERNAME", usernamesString);
-            processBuilder.environment().put("TRIVY_PASSWORD", passwordString);
-        }
-
-        var process = processBuilder.start();
-
-        try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                log.debug("Trivy: " + line);
-                if (line.toLowerCase().contains("unable to find the specified image")) {
-                    log.warn("Terminating Trivy process due to error output: " + line);
-                    process.destroy();
-                    break;
+            var builder = new StringBuilder();
+            try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
                 }
+            }
+
+            var returnCode = process.waitFor();
+            if (returnCode == 0) {
+                return builder.toString();
+            } else {
+                log.warn("Syft failed for container {} with return code {} and error {}", containerImage, returnCode, builder);
             }
         }
 
-        return process;
+        throw new GenerateSBomExeption(containerImage);
+    }
+
+    private static Process runSyftProcess(String containerImage, RegistryCredentials registryCredentials) throws IOException {
+        var syftExecutable = new ClassPathResource(isMacOs() ? "syft/syft-mac-arm" : "syft/syft").getFile();
+        var command = new ArrayList<String>();
+        command.add(syftExecutable.getPath());
+        command.add(containerImage);
+        command.add("-o");
+        command.add("cyclonedx-json");
+        command.add("--quiet");
+
+        var processBuilder = new ProcessBuilder(command);
+        processBuilder.redirectErrorStream(true);
+        processBuilder.environment().put("SYFT_REGISTRY_AUTH_AUTHORITY", registryCredentials.getServer());
+        processBuilder.environment().put("SYFT_REGISTRY_AUTH_USERNAME", registryCredentials.getUsername());
+        processBuilder.environment().put("SYFT_REGISTRY_AUTH_PASSWORD", registryCredentials.getPassword());
+        return processBuilder.start();
     }
 
     public static void analyzeSBom(Container container, List<Classifier> sBomClassifiers) throws ParseException {
@@ -139,10 +111,5 @@ public class AnalyzerUtils implements ApplicationContextAware {
 
     private static boolean isMacOs() {
         return System.getProperty("os.name").toLowerCase().contains("mac");
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        trivyServerUrl = applicationContext.getEnvironment().getProperty("analyzer.trivy-server-url");
     }
 }
