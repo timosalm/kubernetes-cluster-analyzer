@@ -70,4 +70,10 @@ public class Analysis implements Serializable {
         if (hasPendingClassifications) return "Pending";
         return "Completed";
     }
+
+    public long getPendingCount() {
+        return workloads.stream()
+                .flatMap(workload -> workload.getContainers().stream())
+                .filter(container -> container.getStatus() == Classification.Status.PENDING).count();
+    }
 }

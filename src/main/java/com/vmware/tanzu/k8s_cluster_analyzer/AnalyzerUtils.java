@@ -8,6 +8,9 @@ import org.cyclonedx.model.vulnerability.Vulnerability;
 import org.cyclonedx.parsers.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
@@ -23,7 +26,10 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class AnalyzerUtils {
+@org.springframework.stereotype.Component
+public class AnalyzerUtils implements ApplicationContextAware {
+
+    private static String trivyServerUrl;
 
     private static final Logger log = LoggerFactory.getLogger(AnalyzerUtils.class);
 
@@ -50,11 +56,8 @@ public class AnalyzerUtils {
         var command = new ArrayList<String>();
         command.add(trivyExecutable.getPath());
         command.add("image");
-        command.add("--cache-dir");
-        command.add(trivyExecutable.getParent());
-        command.add("--skip-db-update");
-        command.add("--skip-java-db-update");
-        command.add("--skip-check-update");
+        command.add("--server");
+        command.add(trivyServerUrl);
         command.add("--format");
         command.add("cyclonedx");
         command.add("--scanners");
@@ -80,10 +83,10 @@ public class AnalyzerUtils {
 
         try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
+
             while ((line = reader.readLine()) != null) {
-                log.info("Trivy log: " + line);
                 if (line.toLowerCase().contains("unable to find the specified image")) {
-                    log.warn("Terminating Trivy process due to error output");
+                    log.warn("Terminating Trivy process due to error output: " + line);
                     process.destroy();
                     break;
                 }
@@ -134,5 +137,10 @@ public class AnalyzerUtils {
 
     private static boolean isMacOs() {
         return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        trivyServerUrl = applicationContext.getEnvironment().getProperty("analyzer.trivy-server-url");
     }
 }

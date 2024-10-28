@@ -8,13 +8,11 @@ import io.kubernetes.client.openapi.models.V1Deployment;
 import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
-import org.cyclonedx.exception.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -22,7 +20,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 @Service
@@ -30,18 +28,17 @@ public class AnalysisService {
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisService.class);
 
-    private final Semaphore trivyProcessLock = new Semaphore(1);
-    private final Semaphore dbConnectionPoolLock = new Semaphore(1);
     private final AnalyzerConfig analyzerConfig;
     private final AnalysisRepository analysisRepository;
     private final ContainerRepository containerRepository;
-    private final ApplicationEventPublisher publisher;
+    private final TaskExecutor taskExecutor;
 
-    public AnalysisService(AnalyzerConfig analyzerConfig, AnalysisRepository analysisRepository, ContainerRepository containerRepository, ApplicationEventPublisher publisher) {
+    public AnalysisService(AnalyzerConfig analyzerConfig, AnalysisRepository analysisRepository, ContainerRepository containerRepository,
+                           ThreadPoolTaskExecutor taskExecutor) {
         this.analyzerConfig = analyzerConfig;
         this.analysisRepository = analysisRepository;
         this.containerRepository = containerRepository;
-        this.publisher = publisher;
+        this.taskExecutor = taskExecutor;
     }
 
     public Analysis fetchAnalysis(UUID analysisId) {
@@ -74,25 +71,23 @@ public class AnalysisService {
                 workload.getUnclassifiedContainers().forEach(container -> {
                     log.info("Published SBOM analysis event for workload {}/{} container {}",
                             workload.getNamespace(), workload.getName(), container.getImage());
-                    publisher.publishEvent(new ContainerSBomAnalysisEvent(analysis, workload, container, registryCredentials));
+
+                    CompletableFuture.runAsync(() -> {
+                        analyzeContainerSBomAsync(workload, container, registryCredentials);
+                    }, taskExecutor);
                 });
             });
         }
         return analysis;
     }
 
-    @Async
-    @EventListener
-    protected void onContainerSBomAnalysisEvent(ContainerSBomAnalysisEvent event)  {
-        var container = event.getContainer();
-        var workload = event.getWorkload();
-        log.info("Received SBOM analysis event for workload {}/{} container {}", workload.getNamespace(),
-                workload.getName(), container.getImage());
+    protected void analyzeContainerSBomAsync(Workload workload, Container container,
+                                        List<RegistryCredentials> registryCredentials)  {
         String sBom = null;
         try {
             log.info("Starting to create SBOM for workload {}/{} container {}", workload.getNamespace(),
                     workload.getName(), container.getImage());
-            sBom = AnalyzerUtils.generateSBom(container.getImage(), event.getRegistryCredentials());
+            sBom = AnalyzerUtils.generateSBom(container.getImage(), registryCredentials);
             log.info("SBOM creation finished for workload {}/{} container {}", workload.getNamespace(),
                     workload.getName(), container.getImage());
         } catch (Exception e) {
@@ -116,8 +111,6 @@ public class AnalysisService {
                 container.setErrorMessage("Unable to parse SBOM");
             }
         }
-
-
         containerRepository.save(container);
     }
 

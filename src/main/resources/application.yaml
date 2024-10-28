@@ -1,11 +1,10 @@
 spring:
   application.name: k8s-cluster-analyzer
-  #threads.virtual.enabled: true
   jpa:
     generate-ddl: true
-#  task.execution.simple.concurrency-limit: 5
 
 analyzer:
+  trivy-server-url: http://localhost:8081
   excluded-namespaces: kube-node-lease,kube-public,kube-system
   sbom-classifiers:
   - name: "dotnetcore"
