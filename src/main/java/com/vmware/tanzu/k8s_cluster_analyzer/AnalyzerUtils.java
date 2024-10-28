@@ -64,6 +64,7 @@ public class AnalyzerUtils implements ApplicationContextAware {
         command.add("vuln");
         command.add("--output");
         command.add(resultFile.getAbsolutePath());
+        if (log.isDebugEnabled()) command.add("--debug");
         command.add(containerImage);
 
         var processBuilder = new ProcessBuilder(command);
@@ -85,6 +86,7 @@ public class AnalyzerUtils implements ApplicationContextAware {
             String line;
 
             while ((line = reader.readLine()) != null) {
+                log.debug("Trivy: " + line);
                 if (line.toLowerCase().contains("unable to find the specified image")) {
                     log.warn("Terminating Trivy process due to error output: " + line);
                     process.destroy();

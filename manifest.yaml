@@ -12,4 +12,4 @@ applications:
     sidecars:
     - name: trivy-server
       process_types: [ 'web' ]
-      command: './BOOT-INF/classes/trivy/trivy' server --listen 0.0.0.0:8081'
+      command: './BOOT-INF/classes/trivy/trivy server --listen 0.0.0.0:8081'

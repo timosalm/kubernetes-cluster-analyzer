@@ -69,9 +69,6 @@ public class AnalysisService {
         if (useSBom) {
             workloads.forEach(workload -> {
                 workload.getUnclassifiedContainers().forEach(container -> {
-                    log.info("Published SBOM analysis event for workload {}/{} container {}",
-                            workload.getNamespace(), workload.getName(), container.getImage());
-
                     CompletableFuture.runAsync(() -> {
                         analyzeContainerSBomAsync(workload, container, registryCredentials);
                     }, taskExecutor);
@@ -101,8 +98,6 @@ public class AnalysisService {
             container.setSBom(sBom);
             try {
                 AnalyzerUtils.analyzeSBom(container, analyzerConfig.getSbomClassifiers());
-                log.info("Analysis based on SBOM for workload finished {}/{} container {}", workload.getNamespace(),
-                        workload.getName(), container.getImage());
                 container.setStatus(Classification.Status.COMPLETED);
             } catch (Exception e) {
                 log.warn("Unable to parse SBOM for workload {}/{} container {}", workload.getNamespace(), workload.getName(),
