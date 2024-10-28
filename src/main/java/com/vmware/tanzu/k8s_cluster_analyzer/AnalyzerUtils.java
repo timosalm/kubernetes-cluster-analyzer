@@ -70,22 +70,10 @@ public class AnalyzerUtils {
         return processBuilder.start();
     }
 
-    public static void analyzeSBom(Container container, List<Classifier> sBomClassifiers) throws ParseException {
-        var parsedSBom = new JsonParser().parse(container.getSBom().getBytes(StandardCharsets.UTF_8));
-        var classifications = classifySBom(parsedSBom, sBomClassifiers);
-        container.addAll(classifications);
-        var vulnerabilities = parsedSBom.getVulnerabilities().stream()
-                .map(v -> v.getRatings().stream().map(Vulnerability.Rating::getSeverity)
-                        .max(Comparator.comparingInt(Vulnerability.Rating.Severity::ordinal)))
-                .flatMap(Optional::stream)
-                .toList();
-        container.setTotalCveCount(parsedSBom.getVulnerabilities().size());
-        container.setCriticalCveCount(vulnerabilities.stream().filter(v -> v == Vulnerability.Rating.Severity.CRITICAL).toList().size());
-        container.setHighCveCount(vulnerabilities.stream().filter(v -> v == Vulnerability.Rating.Severity.HIGH).toList().size());
-    }
+    public static List<Classification> classifySBom(String sBom, List<Classifier> classifiers) throws ParseException {
+        var parsedSBom = new JsonParser().parse(sBom.getBytes(StandardCharsets.UTF_8));
 
-    public static List<Classification> classifySBom(Bom sBom, List<Classifier> classifiers) {
-        var relevantComponents = AnalyzerUtils.getDirectDependencies(sBom);
+        var relevantComponents = AnalyzerUtils.getDirectDependencies(parsedSBom);
         var matchedClassifiers = new ArrayList<Classifier>();
         var classifications = new ArrayList<Classification>();
         relevantComponents.forEach(component -> {

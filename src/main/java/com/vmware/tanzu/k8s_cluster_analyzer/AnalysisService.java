@@ -8,6 +8,7 @@ import io.kubernetes.client.openapi.models.V1Deployment;
 import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
+import org.cyclonedx.exception.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -97,9 +98,9 @@ public class AnalysisService {
         if (sBom != null) {
             container.setSBom(sBom);
             try {
-                AnalyzerUtils.analyzeSBom(container, analyzerConfig.getSbomClassifiers());
+                container.addAll(AnalyzerUtils.classifySBom(container.getSBom(), analyzerConfig.getSbomClassifiers()));
                 container.setStatus(Classification.Status.COMPLETED);
-            } catch (Exception e) {
+            } catch (ParseException e) {
                 log.warn("Unable to parse SBOM for workload {}/{} container {}", workload.getNamespace(), workload.getName(),
                         container.getImage());
                 container.setStatus(Classification.Status.FAILED);
