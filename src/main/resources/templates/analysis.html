@@ -83,7 +83,7 @@
                                                         </span>
                                                     </td>
                                                     <td colspan="2" class="table-wrapper">
-                                                        <table class="nested-table">
+                                                        <table class="nested-table classification-table">
                                                             <tbody th:each="classification : ${container.classifications}" th:remove="tag">
                                                             <tr>
                                                                 <td class="category-column" th:text="${classification.type} + ' - ' + ${classification.subType}">Container image category</td>

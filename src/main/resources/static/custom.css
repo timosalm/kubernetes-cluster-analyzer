@@ -160,10 +160,14 @@ input[type=text] {
 }
 
 #workloads-table {
-    text-align: center!important; /* Horizontal alignment for text */
+    text-align: center!important;
 }
 
 #workloads-table td,
 #workloads-table th {
-    vertical-align: middle!important; /* Vertical alignment for text */
+    vertical-align: middle!important;
+}
+
+.classification-table td {
+    padding: 0.20rem 0.6rem !important;
 }
