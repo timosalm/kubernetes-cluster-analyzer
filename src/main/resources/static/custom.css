@@ -5,11 +5,6 @@
     font-style: italic;
 }
 
-td {
-    vertical-align: middle !important;;
-    text-align: left !important;
-}
-
 td > :first-child {
     margin-top: 0;
 }
@@ -59,7 +54,7 @@ input[type=text] {
     color: black!important;
 }
 
-#sbom-img {
+.sbom-img {
     width: 1.5rem;
 }
 
@@ -142,4 +137,33 @@ input[type=text] {
 
 .clr-checkbox-wrapper .clr-control-label {
     font-weight: bold;
+}
+
+.helm-column {
+    width: 54px;
+}
+
+.pvcs-column {
+    width: 54px;
+}
+
+.compatibility-column {
+    width: 54px;
+}
+
+.classification-column {
+    width: 100px
+}
+
+.table-wrapper {
+    padding: 0!important;
+}
+
+#workloads-table {
+    text-align: center!important; /* Horizontal alignment for text */
+}
+
+#workloads-table td,
+#workloads-table th {
+    vertical-align: middle!important; /* Vertical alignment for text */
 }

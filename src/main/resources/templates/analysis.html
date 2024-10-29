@@ -42,72 +42,71 @@
                                 </div>
 
 
-                                <table class="table">
+                                <table class="table" id="workloads-table">
                                     <thead>
                                     <tr>
                                         <th>Namespace</th>
                                         <th>Name</th>
-                                        <th>Type</th>
-                                        <th>Images</th>
-                                        <th>Classification</th>
-                                        <th>Category</th>
-                                        <th>Software</th>
-                                        <th>CVEs</th>
-                                        <th>Helm</th>
-                                        <th>PVCs</th>
-                                        <th>Compatibility<br/>with Cloud Foundry</th>
+                                        <th>StatefulSet</th>
+                                        <th class="helm-column">Helm</th>
+                                        <th class="pvcs-column">PVCs</th>
+                                        <th class="images-column">Images</th>
+                                        <th class="classification-column">Classification</th>
+                                        <th class="category-column">Category</th>
+                                        <th class="software-column">Software</th>
+                                        <!--<th>CVEs</th>-->
+                                        <th class="compatibility-column">Compatibility<br/>with Cloud Foundry</th>
                                     </tr>
                                     </thead>
                                     <tbody th:each="workload : ${analysis.workloads}" th:remove="tag">
                                     <tr>
                                         <td th:text="${workload.namespace}">Namespace</td>
                                         <td th:text="${workload.name}">Name</td>
-                                        <td th:text="${workload.type}">Type</td>
-                                        <td>
-                                            <div th:each="container : ${workload.containers}" th:remove="tag">
-                                                <div>
-                                                    <span th:text="${container.image}">Container image</span>
-                                                    <a th:href="@{/analysis/{id}/workloads/{workloadId}/containers/{containerId}/sbom(id=${analysis.id},workloadId=${workload.id},containerId=${container.id})}"
-                                                       th:target="_blank" th:if="${container.sBom != null}">
-                                                        <img th:src="@{/images/sbom.png}" id="sbom-img" alt="SBOM Download">
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div th:each="container : ${workload.containers}" th:remove="tag">
-                                                <div th:text="${container.status}">Classification status</div>
-                                                <div id="classification-tooltip" th:if="${container.errorMessage != null}" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
-                                                    <span class="tooltiptext" th:text="${container.errorMessage}">Error message</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div th:each="container : ${workload.containers}" th:remove="tag">
-                                                <div th:each="classification : ${container.classifications}" th:remove="tag">
-                                                    <div th:text="${classification.type} + ' - ' + ${classification.subType}">Container image category</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div th:each="container : ${workload.containers}" th:remove="tag">
-                                                <div th:each="classification : ${container.classifications}" th:remove="tag">
-                                                    <div th:if="${classification.technology != null}">
-                                                        <div th:text="${classification.technology} + ' ' + (${classification.technologyVersion} ?: '')">Classification technology</div>
-                                                        <div th:if="${classification.notes != null}" id="notes-tooltip" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
-                                                            <span class="tooltiptext" th:text="${container.notes}">Notes</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div th:each="container : ${workload.containers}" th:remove="tag">
-                                                <div th:if="${container.totalCveCount != null && container.totalCveCount > 0}"  th:text="${'Total ' + container.totalCveCount + ' (CRITICAL: ' + container.criticalCveCount + ', HIGH: ' + container.highCveCount + ')'}">Container CVE Count</div>
-                                            </div>
-                                        </td>
+                                        <td th:text="${#strings.equals(workload.type, 'STATEFUL_SET')} ? 'Yes' : 'No'">Type</td>
                                         <td th:text="${workload.hasPvc} ? 'Yes' : 'No'">PVC</td>
-                                        <td th:text="${workload.managedByHelm} ? 'Yes' : 'No'">PVC</td>
+                                        <td th:text="${workload.managedByHelm} ? 'Yes' : 'No'">Helm</td>
+                                        <td colspan="4" class="table-wrapper">
+                                            <table class="nested-table">
+                                                <tbody th:each="container : ${workload.containers}" th:remove="tag">
+                                                <tr>
+                                                    <td class="images-column">
+                                                        <span th:text="${container.image}">Container image</span>
+                                                        <a th:href="@{/analysis/{id}/workloads/{workloadId}/containers/{containerId}/sbom(id=${analysis.id},workloadId=${workload.id},containerId=${container.id})}"
+                                                           th:target="_blank" th:if="${container.sBom != null}">
+                                                            <img th:src="@{/images/sbom.png}" class="sbom-img" alt="SBOM Download">
+                                                        </a>
+                                                    </td>
+                                                    <td class="classification-column">
+                                                        <span th:text="${container.status}">Classification status</span>
+                                                        <span th:if="${container.errorMessage != null}" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                                            <span class="tooltiptext" th:text="${container.errorMessage}">Error message</span>
+                                                        </span>
+                                                    </td>
+                                                    <td colspan="2" class="table-wrapper">
+                                                        <table class="nested-table">
+                                                            <tbody th:each="classification : ${container.classifications}" th:remove="tag">
+                                                            <tr>
+                                                                <td class="category-column" th:text="${classification.type} + ' - ' + ${classification.subType}">Container image category</td>
+                                                                <td class="software-column">
+                                                                    <span th:text="${classification.technology} + ' ' + (${classification.technologyVersion} ?: '')" th:if="${classification.technology != null}">Classification technology</span>
+                                                                    <span th:if="${classification.notes != null}" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                                                        <span class="tooltiptext" th:text="${classification.notes}">Notes</span>
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                    <!--
+                                                    <td>
+                                                        <div th:if="${container.totalCveCount != null && container.totalCveCount > 0}"  th:text="${'Total ' + container.totalCveCount + ' (CRITICAL: ' + container.criticalCveCount + ', HIGH: ' + container.highCveCount + ')'}">Container CVE Count</div>
+                                                    </td>
+                                                    -->
+
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
                                         <td class="cf-compatibility-cell">
                                             <div th:each="container : ${workload.containers}" th:remove="tag">
                                                 <div th:each="classification : ${container.classifications}" th:remove="tag">
@@ -160,6 +159,23 @@
         var chart = new google.visualization.PieChart(document.getElementById('container-category-chart'));
         chart.draw(data, options);
     }
+</script>
+<script type="text/javascript" th:inline="javascript">
+    function adjustColumnsWithClass(cssClass) {
+        const imageColumns = document.querySelectorAll(cssClass);
+        const maxWidth = Math.max(...Array.from(imageColumns).map(c => c.offsetWidth));
+        imageColumns.forEach(c => c.style.width = `${maxWidth}px`);
+    }
+
+    function adjustTable() {
+        adjustColumnsWithClass(".images-column");
+        adjustColumnsWithClass(".software-column");
+        adjustColumnsWithClass(".category-column");
+    }
+
+    window.addEventListener("resize", adjustTable);
+
+    window.addEventListener("load", adjustTable);
 </script>
 </body>
 </html>

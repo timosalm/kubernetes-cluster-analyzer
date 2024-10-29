@@ -602,12 +602,13 @@ analyzer:
     fit: 0
     documentation: ""
   - name: "spring-cloud-dataflow"
-    type:
+    type: "Processing"
+    sub-type: "Data Integration & ETL"
     technology: "Spring Cloud Data Flow"
     regex: ".*spring-cloud-dataflow.*"
     fit: 1
     documentation: "https://docs.vmware.com/en/Spring-Cloud-Data-Flow-for-VMware-Tanzu/index.html"
-    notes: "VMware's commercial version of Cloud Foundry provides a commercial version of Spring Cloud Data Flow with additional features. You can also run OSS SCDF on CF"
+    notes: "VMware's commercial version of Cloud Foundry provides a commercial version of Spring Cloud Data Flow with additional features. You can also run OSS SCDF on CF."
   ### Messaging / Message Broker
   - name: "rabbitmq"
     type: "Messaging"
@@ -838,7 +839,7 @@ analyzer:
     regex: ".*spring-cloud-gateway.*"
     fit: 1
     documentation: "https://docs.vmware.com/en/Spring-Cloud-Gateway-for-VMware-Tanzu/index.html"
-    notes: "VMware's commercial version of Cloud Foundry provides a commercial version of Spring Cloud Gateway with additional features. You can also run OSS SCGW on CF"
+    notes: "VMware's commercial version of Cloud Foundry provides a commercial version of Spring Cloud Gateway with additional features. You can also run OSS SCGW on CF."
     ### Kubernetes
   - name: istio
     type: "Kubernetes"
