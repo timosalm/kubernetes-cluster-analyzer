@@ -20,8 +20,10 @@ public class Classification {
     private int fit;
     private String documentation;
     private String technologyVersion;
+    private String notes;
 
-    public Classification(String type, String subType, String technology, int fit, String documentation, String technologyVersion) {
+    public Classification(String type, String subType, String technology, int fit, String documentation, String technologyVersion, String notes) {
+        this.notes = notes;
         this.id = UUID.randomUUID();
         this.type = type;
         this.subType = subType;
@@ -40,7 +42,7 @@ public class Classification {
 
     public static Classification from(Classifier classifier, String technologyVersion) {
         return new Classification(classifier.type(), classifier.subType(), classifier.technology(), classifier.fit(),
-                classifier.documentation(), technologyVersion);
+                classifier.documentation(), technologyVersion, classifier.notes());
     }
 
     public UUID getId() {
@@ -97,6 +99,14 @@ public class Classification {
 
     public void setTechnologyVersion(String technologyVersion) {
         this.technologyVersion = technologyVersion;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
 }

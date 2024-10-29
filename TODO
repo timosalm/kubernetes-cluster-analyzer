@@ -1,4 +1,7 @@
 - Memory, CPU für Workload extrahieren
-- Handle Analysis not found
-
+- CF compatibility
+- Refresgh automatically
+- CVE scanning
 - Get available MB services
+- Hint Spring Support
+- Hint push container

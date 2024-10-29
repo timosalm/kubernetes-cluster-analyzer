@@ -91,6 +91,7 @@ analyzer:
     regex: "spring-boot"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/java-index.html"
+    notes: "Spring applications running on the VMware's commercial version of Cloud Foundry are entitled to commercial Spring support: https://spring.io/support"
   - name: "spring-framework"
     type: "Programming Language"
     sub-type: "Java"
@@ -600,6 +601,13 @@ analyzer:
     regex: ".*airbyte.*"
     fit: 0
     documentation: ""
+  - name: "spring-cloud-dataflow"
+    type:
+    technology: "Spring Cloud Data Flow"
+    regex: ".*spring-cloud-dataflow.*"
+    fit: 1
+    documentation: "https://docs.vmware.com/en/Spring-Cloud-Data-Flow-for-VMware-Tanzu/index.html"
+    notes: "VMware's commercial version of Cloud Foundry provides a commercial version of Spring Cloud Data Flow with additional features. You can also run OSS SCDF on CF"
   ### Messaging / Message Broker
   - name: "rabbitmq"
     type: "Messaging"
@@ -724,18 +732,18 @@ analyzer:
   - name: "grafana"
     type: "Observability"
     sub-type: "Logging"
-    technology: "Grafana"
+    technology: "Grafana Loki"
     regex: ".*loki.*"
-    fit: 0
-    documentation: ""
+    fit: 1
+    documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
   ### Observability - Monitoring
   - name: "grafana"
     type: "Observability"
     sub-type: "Visualization"
     technology: "Grafana"
     regex: ".*grafana.*"
-    fit: 0
-    documentation: ""
+    fit: 1
+    documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
   ### Web Server - HTTP
   - name: "nginx"
     type: "Web Server"
@@ -828,9 +836,10 @@ analyzer:
     sub-type: "API Gateway"
     technology: "Spring Cloud Gateway"
     regex: ".*spring-cloud-gateway.*"
-    fit: 0
-    documentation: ""
-  ### Kubernetes
+    fit: 1
+    documentation: "https://docs.vmware.com/en/Spring-Cloud-Gateway-for-VMware-Tanzu/index.html"
+    notes: "VMware's commercial version of Cloud Foundry provides a commercial version of Spring Cloud Gateway with additional features. You can also run OSS SCGW on CF"
+    ### Kubernetes
   - name: istio
     type: "Kubernetes"
     sub-type: "Networking"
