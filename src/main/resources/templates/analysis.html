@@ -35,6 +35,7 @@
                                 <h4 th:text="${'Analysis ID: ' + analysis.id}"></h4>
                                 <h4 th:text="${'Scan started at ' + #temporals.format(analysis.createdAt, 'dd-MM-yyyy HH:mm')}"></h4>
                                 <h4 th:text="|Status: ${analysis.status} ${analysis.pendingCount > 0 ? '(' + analysis.pendingCount + ')' : ''}|"></h4>
+                                <h4 th:if="${analysis != null}" th:text="|Failed: ${analysis.failedCount}|"></h4>
 
                                 <div id="charts">
                                     <div>

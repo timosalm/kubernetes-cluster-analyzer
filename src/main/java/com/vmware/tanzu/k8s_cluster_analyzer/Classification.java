@@ -9,7 +9,17 @@ import java.util.UUID;
 public class Classification {
 
     public enum Status {
-        PENDING, COMPLETED, FAILED
+        PENDING("Pending"), COMPLETED("Completed"), FAILED("Failed");
+
+        private final String label;
+        Status(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return this.label;
+        }
     }
 
     @Id
