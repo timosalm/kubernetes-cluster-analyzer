@@ -69,7 +69,7 @@ public class AnalysisUiController {
         model.addAttribute("containerCategoriesChartData", getContainerCategoriesChartData(analysis));
 
         var modelAndView = new ModelAndView("analysis :: analysisResult", "", model);
-        if (analysis.getStatus() == Analysis.Status.COMPLETED) {
+        if (analysis.getStatus() == Classification.Status.COMPLETED) {
             // Stop polling https://htmx.org/docs/#polling
             modelAndView.setStatus(HttpStatusCode.valueOf(286));
         } else {

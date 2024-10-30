@@ -35,7 +35,12 @@
                                 <h4 th:text="${'Analysis ID: ' + analysis.id}"></h4>
                                 <h4 th:text="${'Scan started at ' + #temporals.format(analysis.createdAt, 'dd-MM-yyyy HH:mm')}"></h4>
                                 <h4 th:text="|Status: ${analysis.status} ${analysis.pendingCount > 0 ? '(' + analysis.pendingCount + ')' : ''}|"></h4>
-                                <h4 th:if="${analysis != null}" th:text="|Failed: ${analysis.failedCount}|"></h4>
+                                <h4>
+                                    <span th:text="|Failed: ${analysis.failedCount}|"></span>
+                                    <span class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                        <span class="tooltiptext">The classification of containers can fail for various reasons, such as missing registry credentials or the registry being unreachable from the environment this analyzer is running on.</span>
+                                    </span>
+                                </h4>
 
                                 <div id="charts">
                                     <div>
