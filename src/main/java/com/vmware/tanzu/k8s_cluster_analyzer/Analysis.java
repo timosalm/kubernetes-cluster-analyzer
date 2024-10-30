@@ -63,17 +63,31 @@ public class Analysis implements Serializable {
         this.kubernetesContext = kubernetesContext;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         var hasPendingClassifications = workloads.stream()
                 .flatMap(workload -> workload.getContainers().stream())
                 .anyMatch(container -> container.getStatus() == Classification.Status.PENDING);
-        if (hasPendingClassifications) return "Pending";
-        return "Completed";
+        if (hasPendingClassifications) return Status.PENDING;
+        return Status.COMPLETED;
     }
 
     public long getPendingCount() {
         return workloads.stream()
                 .flatMap(workload -> workload.getContainers().stream())
                 .filter(container -> container.getStatus() == Classification.Status.PENDING).count();
+    }
+
+    public enum Status {
+        PENDING("Pending"), COMPLETED("Completed");
+
+        private final String label;
+        Status(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return this.label;
+        }
     }
 }

@@ -22,8 +22,8 @@
             </a>
         </div>
     </header>
-    <div class="content-container">
-        <div class="content-area">
+    <div class="content-container" hx:get="@{/analysis/{id}(id=${analysis.id})}" hx-trigger="every 2s">
+        <div class="content-area" th:fragment="analysisResult">
             <div class="clr-row">
                 <div class="clr-col">
                     <div class="card">
@@ -119,6 +119,57 @@
                                     </tr>
                                 </table>
                             </div>
+                            <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+                            <script type="text/javascript" th:inline="javascript">
+
+                                // Load the Visualization API and the corechart package.
+                                google.charts.load('current', {'packages':['corechart']});
+
+                                // Set a callback to run when the Google Visualization API is loaded.
+                                google.charts.setOnLoadCallback(drawChart);
+
+                                // Callback that creates and populates a data table,
+                                // instantiates the pie chart, passes in the data and
+                                // draws it.
+                                function drawChart() {
+
+                                    // Create the data table.
+                                    var data = new google.visualization.DataTable();
+                                    data.addColumn('string', 'Category');
+                                    data.addColumn('number', 'Containers');
+                                    data.addRows([[${containerCategoriesChartData}]]);
+
+                                    // Set chart options
+                                    var options = {
+                                        'width':500,
+                                        'height':500,
+                                        'legend': 'none',
+                                        'pieSliceText': 'label',
+                                        'backgroundColor': 'transparent'
+                                    };
+
+                                    // Instantiate and draw our chart, passing in some options.
+                                    var chart = new google.visualization.PieChart(document.getElementById('container-category-chart'));
+                                    chart.draw(data, options);
+                                }
+                            </script>
+                            <script type="text/javascript" th:inline="javascript">
+                                function adjustColumnsWithClass(cssClass) {
+                                    const imageColumns = document.querySelectorAll(cssClass);
+                                    const maxWidth = Math.max(...Array.from(imageColumns).map(c => c.offsetWidth));
+                                    imageColumns.forEach(c => c.style.width = `${maxWidth}px`);
+                                }
+
+                                function adjustTable() {
+                                    adjustColumnsWithClass(".images-column");
+                                    adjustColumnsWithClass(".software-column");
+                                    adjustColumnsWithClass(".category-column");
+                                }
+
+                                adjustTable();
+                                window.addEventListener("resize", adjustTable);
+
+                            </script>
                         </div>
                     </div>
                 </div>
@@ -126,56 +177,6 @@
         </div>
     </div>
 </div>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript" th:inline="javascript">
-
-    // Load the Visualization API and the corechart package.
-    google.charts.load('current', {'packages':['corechart']});
-
-    // Set a callback to run when the Google Visualization API is loaded.
-    google.charts.setOnLoadCallback(drawChart);
-
-    // Callback that creates and populates a data table,
-    // instantiates the pie chart, passes in the data and
-    // draws it.
-    function drawChart() {
-
-        // Create the data table.
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Category');
-        data.addColumn('number', 'Containers');
-        data.addRows([[${containerCategoriesChartData}]]);
-
-        // Set chart options
-        var options = {
-            'width':500,
-            'height':500,
-            'legend': 'none',
-            'pieSliceText': 'label',
-            'backgroundColor': 'transparent'
-        };
-
-        // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.PieChart(document.getElementById('container-category-chart'));
-        chart.draw(data, options);
-    }
-</script>
-<script type="text/javascript" th:inline="javascript">
-    function adjustColumnsWithClass(cssClass) {
-        const imageColumns = document.querySelectorAll(cssClass);
-        const maxWidth = Math.max(...Array.from(imageColumns).map(c => c.offsetWidth));
-        imageColumns.forEach(c => c.style.width = `${maxWidth}px`);
-    }
-
-    function adjustTable() {
-        adjustColumnsWithClass(".images-column");
-        adjustColumnsWithClass(".software-column");
-        adjustColumnsWithClass(".category-column");
-    }
-
-    window.addEventListener("resize", adjustTable);
-
-    window.addEventListener("load", adjustTable);
-</script>
+<script type="text/javascript" src="https://unpkg.com/htmx.org@2.0.3"></script>
 </body>
 </html>
