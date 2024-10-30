@@ -3,6 +3,7 @@ package com.vmware.tanzu.k8s_cluster_analyzer;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HtmxResponse;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import io.kubernetes.client.openapi.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -69,8 +70,10 @@ public class AnalysisUiController {
 
         var modelAndView = new ModelAndView("analysis :: analysisResult", "", model);
         if (analysis.getStatus() == Analysis.Status.COMPLETED) {
-            // Stop polling
+            // Stop polling https://htmx.org/docs/#polling
             modelAndView.setStatus(HttpStatusCode.valueOf(286));
+        } else {
+            modelAndView.setStatus(HttpStatus.OK);
         }
         return modelAndView;
     }
