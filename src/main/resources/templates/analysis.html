@@ -24,8 +24,8 @@
             </a>
         </div>
     </header>
-    <div class="content-container" hx:get="@{/analysis/{id}(id=${analysis.id})}" hx-trigger="every 2s">
-        <div class="content-area" th:fragment="analysisResult">
+    <div class="content-container" hx:get="@{/analysis/{id}(id=${analysis.id})}" hx-trigger="every 5s">
+        <div id="analysis-content" class="content-area" th:fragment="analysisResult">
             <div class="clr-row">
                 <div class="clr-col">
                     <div class="card">
@@ -93,7 +93,7 @@
                                                     <td colspan="2" class="table-wrapper">
                                                         <table class="nested-table classification-table">
                                                             <tbody th:each="classification : ${container.classifications}" th:remove="tag">
-                                                            <tr>
+                                                            <tr th:class="${#strings.equals(classification.type, 'Programming Language') ? 'bold' : ''}">
                                                                 <td class="category-column" th:text="${classification.type} + ' - ' + ${classification.subType}">Container image category</td>
                                                                 <td class="software-column">
                                                                     <span th:text="${classification.technology} + ' ' + (${classification.technologyVersion} ?: '')" th:if="${classification.technology != null}">Classification technology</span>
@@ -175,7 +175,6 @@
 
                                 adjustTable();
                                 window.addEventListener("resize", adjustTable);
-
                             </script>
                         </div>
                     </div>
@@ -184,5 +183,20 @@
         </div>
     </div>
 </div>
+<script type="text/javascript" th:inline="javascript">
+    let scrollPosition = {x: 0, y:0};
+
+    document.body.addEventListener("htmx:beforeRequest", (event) => {
+        var contentContainer = document.getElementById("analysis-content");
+        scrollPosition.x = contentContainer.scrollLeft;
+        scrollPosition.y = contentContainer.scrollTop;
+    });
+
+    document.body.addEventListener("htmx:afterSettle", (event) => {
+        var contentContainer = document.getElementById("analysis-content");
+        contentContainer.scrollTo(scrollPosition.x, scrollPosition.y);
+    });
+
+</script>
 </body>
 </html>

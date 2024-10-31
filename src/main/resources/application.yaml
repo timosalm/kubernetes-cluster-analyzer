@@ -77,13 +77,6 @@ analyzer:
     regex: ".*ruby.*"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/ruby-index.html"
-  - name: "jvm"
-    type: "Programming Language"
-    sub-type: "Java"
-    technology: "Java"
-    regex: ".*jvm.*"
-    fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/java-index.html"
   - name: "spring-boot"
     type: "Programming Language"
     sub-type: "Java"
