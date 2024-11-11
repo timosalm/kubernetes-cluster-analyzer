@@ -2,6 +2,7 @@ spring:
   application.name: k8s-cluster-analyzer
   jpa:
     generate-ddl: true
+  config.import: "optional:configserver:"
 
 analyzer:
   excluded-namespaces: kube-node-lease,kube-public,kube-system

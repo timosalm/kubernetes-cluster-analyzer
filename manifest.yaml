@@ -9,3 +9,5 @@ applications:
     instances: 1
     env:
       JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+ } }'
+      SPRING_PROFILES_ACTIVE: cloud
+      JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
