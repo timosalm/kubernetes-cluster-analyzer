@@ -44,8 +44,16 @@
 
                                 <div id="charts">
                                     <div>
+                                        <p class="chart-headline">Detected Programming Languages</p>
+                                        <div id="container-programming-languages-chart"></div>
+                                    </div>
+                                    <div>
                                         <p class="chart-headline">Detected Container Categories</p>
                                         <div id="container-category-chart"></div>
+                                    </div>
+                                    <div>
+                                        <p class="chart-headline">Estimated Cloud Foundry Compatibility</p>
+                                        <div id="container-compatibility-chart"></div>
                                     </div>
                                 </div>
 
@@ -140,13 +148,6 @@
                                 // draws it.
                                 function drawChart() {
 
-                                    // Create the data table.
-                                    var data = new google.visualization.DataTable();
-                                    data.addColumn('string', 'Category');
-                                    data.addColumn('number', 'Containers');
-                                    data.addRows([[${containerCategoriesChartData}]]);
-
-                                    // Set chart options
                                     var options = {
                                         'width':500,
                                         'height':500,
@@ -155,9 +156,29 @@
                                         'backgroundColor': 'transparent'
                                     };
 
-                                    // Instantiate and draw our chart, passing in some options.
-                                    var chart = new google.visualization.PieChart(document.getElementById('container-category-chart'));
-                                    chart.draw(data, options);
+                                    var containerProgrammingLanguagesChartData = new google.visualization.DataTable();
+                                    containerProgrammingLanguagesChartData.addColumn('string', 'Category');
+                                    containerProgrammingLanguagesChartData.addColumn('number', 'Containers');
+                                    containerProgrammingLanguagesChartData.addRows([[${containerProgrammingLanguagesChartData}]]);
+
+                                    var containerProgrammingLanguagesChart = new google.visualization.PieChart(document.getElementById('container-programming-languages-chart'));
+                                    containerProgrammingLanguagesChart.draw(containerProgrammingLanguagesChartData, options);
+
+                                    var containerCategoriesChartData = new google.visualization.DataTable();
+                                    containerCategoriesChartData.addColumn('string', 'Category');
+                                    containerCategoriesChartData.addColumn('number', 'Containers');
+                                    containerCategoriesChartData.addRows([[${containerCategoriesChartData}]]);
+
+                                    var containerCategoriesChart = new google.visualization.PieChart(document.getElementById('container-category-chart'));
+                                    containerCategoriesChart.draw(containerCategoriesChartData, options);
+
+                                    var containerCompatibilityChartData = new google.visualization.DataTable();
+                                    containerCompatibilityChartData.addColumn('string', 'Compatibility');
+                                    containerCompatibilityChartData.addColumn('number', 'Containers');
+                                    containerCompatibilityChartData.addRows([[${containerCompatibilityChartData}]]);
+
+                                    var containerCompatibilityChart = new google.visualization.PieChart(document.getElementById('container-compatibility-chart'));
+                                    containerCompatibilityChart.draw(containerCompatibilityChartData, options);
                                 }
                             </script>
                             <script type="text/javascript" th:inline="javascript">

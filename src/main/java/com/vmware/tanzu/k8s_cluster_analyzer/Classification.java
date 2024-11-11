@@ -22,17 +22,31 @@ public class Classification {
         }
     }
 
+    public enum Fit {
+        No("No"), HIGH("High"), MEDIUM("Medium"), Low("Low"), Unknown("Unknown");
+
+        private final String label;
+        Fit(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return this.label;
+        }
+    }
+
     @Id
     private UUID id;
     private String type;
     private String subType;
     private String technology;
-    private int fit;
+    private Fit fit;
     private String documentation;
     private String technologyVersion;
     private String notes;
 
-    public Classification(String type, String subType, String technology, int fit, String documentation, String technologyVersion, String notes) {
+    public Classification(String type, String subType, String technology, Fit fit, String documentation, String technologyVersion, String notes) {
         this.notes = notes;
         this.id = UUID.randomUUID();
         this.type = type;
@@ -51,7 +65,7 @@ public class Classification {
     }
 
     public static Classification from(Classifier classifier, String technologyVersion) {
-        return new Classification(classifier.type(), classifier.subType(), classifier.technology(), classifier.fit(),
+        return new Classification(classifier.type(), classifier.subType(), classifier.technology(), Fit.values()[classifier.fit()],
                 classifier.documentation(), technologyVersion, classifier.notes());
     }
 
@@ -87,11 +101,11 @@ public class Classification {
         this.technology = technology;
     }
 
-    public int getFit() {
+    public Fit getFit() {
         return fit;
     }
 
-    public void setFit(int fit) {
+    public void setFit(Fit fit) {
         this.fit = fit;
     }
 

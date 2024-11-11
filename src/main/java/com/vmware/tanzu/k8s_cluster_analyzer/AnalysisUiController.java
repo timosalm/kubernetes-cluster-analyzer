@@ -18,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,8 @@ public class AnalysisUiController {
         if (analysis == null) throw new ResourceNotFoundException();
         model.addAttribute("analysis", analysis);
         model.addAttribute("containerCategoriesChartData", getContainerCategoriesChartData(analysis));
+        model.addAttribute("containerProgrammingLanguagesChartData", getContainerProgrammingLanguagesChartData(analysis));
+        model.addAttribute("containerCompatibilityChartData", getContainerCompatibilityChartData(analysis));
         return "analysis";
     }
 
@@ -66,6 +69,8 @@ public class AnalysisUiController {
 
         model.addAttribute("analysis", analysis);
         model.addAttribute("containerCategoriesChartData", getContainerCategoriesChartData(analysis));
+        model.addAttribute("containerProgrammingLanguagesChartData", getContainerProgrammingLanguagesChartData(analysis));
+        model.addAttribute("containerCompatibilityChartData", getContainerCompatibilityChartData(analysis));
 
         var modelAndView = new ModelAndView("analysis :: analysisResult", "", model);
         if (analysis.getStatus() == Classification.Status.COMPLETED) {
@@ -82,6 +87,26 @@ public class AnalysisUiController {
                 .flatMap(w -> w.getContainers().stream())
                 .flatMap(c -> c.getClassifications().stream())
                 .map(c -> c == null ? "Not detected" : c.getType() + " - " + c.getSubType())
+                .collect(Collectors.groupingBy(s -> s, Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> List.of(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    private List<List<?>> getContainerProgrammingLanguagesChartData(Analysis analysis) {
+        return analysis.getWorkloads().stream()
+                .flatMap(w -> w.getContainers().stream())
+                .flatMap(c -> c.getClassifications().stream())
+                .filter(c -> c != null && c.getType().equals("Programming Language"))
+                .map(c -> c.getType() + " - " + c.getSubType())
+                .collect(Collectors.groupingBy(s -> s, Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> List.of(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    private List<List<?>> getContainerCompatibilityChartData(Analysis analysis) {
+        return analysis.getWorkloads().stream().map(w -> w.getCompatibility().toString())
                 .collect(Collectors.groupingBy(s -> s, Collectors.counting()))
                 .entrySet().stream()
                 .map(entry -> List.of(entry.getKey(), entry.getValue()))

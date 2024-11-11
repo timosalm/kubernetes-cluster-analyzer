@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -166,5 +167,11 @@ public class Workload {
 
     public void setContainers(List<Container> containers) {
         this.containers = containers;
+    }
+
+    public Classification.Fit getCompatibility() {
+        return containers.stream().flatMap(c -> c.getClassifications().stream())
+                .map(Classification::getFit)
+                .max(Comparator.naturalOrder()).orElse(Classification.Fit.Unknown);
     }
 }

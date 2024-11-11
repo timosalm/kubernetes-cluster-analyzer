@@ -82,4 +82,5 @@ public class Analysis implements Serializable {
                 .flatMap(workload -> workload.getContainers().stream())
                 .filter(container -> container.getStatus() == Classification.Status.FAILED).count();
     }
+
 }
