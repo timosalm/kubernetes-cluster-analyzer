@@ -4,7 +4,6 @@ spring:
     generate-ddl: true
 
 analyzer:
-  trivy-server-url: http://localhost:8081
   excluded-namespaces: kube-node-lease,kube-public,kube-system
   sbom-classifiers:
   - name: "dotnetcore"
@@ -891,3 +890,10 @@ analyzer:
     regex: ".*oauth2-proxy.*"
     fit: 0
     documentation: ""
+  - name: vault
+    type: "Misc"
+    sub-type: "Security"
+    technology: "Vault"
+    regex: ".*vault.*"
+    fit: 2
+    documentation: "https://docs.vmware.com/en/CredHub-Service-Broker/services/credhub/GUID-index.html"

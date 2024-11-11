@@ -1,7 +1,10 @@
 - Memory, CPU für Workload extrahieren
 - CF compatibility
-- Refresgh automatically
 - CVE scanning
 - Get available MB services
 - Hint Spring Support
 - Hint push container
+
+- Hints @ start page
+- Additional diagrams
+- Color Coding
