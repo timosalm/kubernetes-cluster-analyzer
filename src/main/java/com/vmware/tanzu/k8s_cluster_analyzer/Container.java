@@ -131,14 +131,6 @@ public class Container implements Serializable {
         classifications.forEach(this::addClassification);
     }
 
-    public String getsBom() {
-        return sBom;
-    }
-
-    public void setsBom(String sBom) {
-        this.sBom = sBom;
-    }
-
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }

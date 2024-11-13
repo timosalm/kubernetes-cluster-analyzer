@@ -2,25 +2,22 @@ package com.vmware.tanzu.k8s_cluster_analyzer;
 
 public class RegistryCredentials {
 
-    public String server;
-    public String username;
-    public String password;
+    private String url;
+    private String username;
+    private String password;
 
     public RegistryCredentials() {
     }
 
-    public RegistryCredentials(String server, String username, String password) {
-        this.server = server;
+    public RegistryCredentials(String url, String username, String password) {
+        setUrl(url);
         this.username = username;
         this.password = password;
     }
 
     public String getServer() {
-        return server;
-    }
-
-    public void setServer(String server) {
-        this.server = server;
+        if (url == null || url.isEmpty()) return "";
+        return url.split("/")[0];
     }
 
     public String getUsername() {
@@ -37,5 +34,13 @@ public class RegistryCredentials {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url != null ? url.replace("http://", "").replace("https://", "") : null;
     }
 }

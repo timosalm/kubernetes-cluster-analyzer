@@ -1,10 +1,6 @@
 package com.vmware.tanzu.k8s_cluster_analyzer;
 
 import org.cyclonedx.exception.ParseException;
-import org.cyclonedx.model.Bom;
-import org.cyclonedx.model.BomReference;
-import org.cyclonedx.model.Component;
-import org.cyclonedx.model.vulnerability.Vulnerability;
 import org.cyclonedx.parsers.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -27,11 +22,7 @@ public class AnalyzerUtils {
     private static final Logger log = LoggerFactory.getLogger(AnalyzerUtils.class);
 
     public static String generateSBom(String containerImage, List<RegistryCredentials> registryCredentials) throws IOException, InterruptedException, GenerateSBomExeption {
-
-        var  relevantRegistryCredentials = registryCredentials.stream().filter(c -> containerImage.startsWith(c.getServer())).collect(Collectors.toCollection(ArrayList::new));
-        relevantRegistryCredentials.add(new RegistryCredentials("","",""));
-
-        for (RegistryCredentials creds : relevantRegistryCredentials) {
+        for (RegistryCredentials creds : registryCredentials) {
             var process =  runSyftProcess(containerImage, creds);
 
             var builder = new StringBuilder();
@@ -90,5 +81,15 @@ public class AnalyzerUtils {
 
     private static boolean isMacOs() {
         return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
+    public static List<RegistryCredentials> getRelevantRegistryCredentials(String containerImage,
+                                                                           List<RegistryCredentials> registryCredentials) {
+        var relevantRegistryCredentials = registryCredentials.stream()
+                .filter(credential -> containerImage.startsWith(credential.getUrl()))
+                .sorted(Comparator.comparingInt((RegistryCredentials c) -> c.getUrl().length()).reversed())
+                .collect(Collectors.toList());
+        relevantRegistryCredentials.add(new RegistryCredentials("","",""));
+        return relevantRegistryCredentials;
     }
 }

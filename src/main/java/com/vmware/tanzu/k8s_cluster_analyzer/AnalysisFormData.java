@@ -73,9 +73,9 @@ public class AnalysisFormData {
         }
 
         return registryCredentials.stream().filter(credentials ->
-                credentials.server != null && !credentials.server.isEmpty() &&
-                        credentials.username != null && !credentials.username.isEmpty() &&
-                        credentials.password != null && !credentials.password.isEmpty()
+                credentials.getUrl() != null && !credentials.getUrl().isEmpty() &&
+                        credentials.getUsername() != null && !credentials.getUsername().isEmpty() &&
+                        credentials.getPassword() != null && !credentials.getPassword().isEmpty()
         ).toList();
     }
 

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -68,46 +69,51 @@ public class AnalysisService {
         log.info("Analysis created with id {} for context {}", analysis.getId(), analysis.getKubernetesContext());
 
         if (useSBom) {
-            workloads.forEach(workload -> {
-                workload.getUnclassifiedContainers().forEach(container -> {
-                    CompletableFuture.runAsync(() -> {
-                        analyzeContainerSBomAsync(workload, container, registryCredentials);
-                    }, taskExecutor);
-                });
+            var containersByImage = workloads.stream().flatMap(w -> w.getUnclassifiedContainers().stream())
+                    .collect(Collectors.groupingBy(Container::getImage));
+
+            containersByImage.forEach((image, containers) -> {
+                var relevantRegistryCredentials = AnalyzerUtils.getRelevantRegistryCredentials(image, registryCredentials);
+                CompletableFuture.runAsync(() -> analyzeContainerSBomAsync(image, containers, relevantRegistryCredentials), taskExecutor);
             });
         }
         return analysis;
     }
 
-    protected void analyzeContainerSBomAsync(Workload workload, Container container,
+    protected void analyzeContainerSBomAsync(String image, List<Container> containers,
                                         List<RegistryCredentials> registryCredentials)  {
         String sBom = null;
         try {
-            log.info("Starting to create SBOM for workload {}/{} container {}", workload.getNamespace(),
-                    workload.getName(), container.getImage());
-            sBom = AnalyzerUtils.generateSBom(container.getImage(), registryCredentials);
-            log.info("SBOM creation finished for workload {}/{} container {}", workload.getNamespace(),
-                    workload.getName(), container.getImage());
+            log.info("Starting to create SBOM for image {}", image);
+            sBom = AnalyzerUtils.generateSBom(image, registryCredentials);
+            log.info("SBOM creation finished for image {}", image);
         } catch (Exception e) {
-            log.warn("SBOM generation failed for workload {}/{} container {}", workload.getNamespace(),
-                    workload.getName(), container.getImage());
-            container.setStatus(Classification.Status.FAILED);
-            container.setErrorMessage("SBOM generation failed");
+            log.warn("SBOM generation failed for image {}", image);
+            containers.forEach(c -> {
+                c.setStatus(Classification.Status.FAILED);
+                c.setErrorMessage("SBOM generation failed");
+            });
         }
 
         if (sBom != null) {
-            container.setSBom(sBom);
             try {
-                container.addAll(AnalyzerUtils.classifySBom(container.getSBom(), analyzerConfig.getSbomClassifiers()));
-                container.setStatus(Classification.Status.COMPLETED);
+                var classifications = AnalyzerUtils.classifySBom(sBom, analyzerConfig.getSbomClassifiers());
+                var finalSBom = sBom;
+                containers.forEach(c -> {
+                    c.setSBom(finalSBom);
+                    c.addAll(classifications);
+                    c.setStatus(Classification.Status.COMPLETED);
+                });
             } catch (ParseException e) {
-                log.warn("Unable to parse SBOM for workload {}/{} container {}", workload.getNamespace(), workload.getName(),
-                        container.getImage());
-                container.setStatus(Classification.Status.FAILED);
-                container.setErrorMessage("Unable to parse SBOM");
+                log.warn("Unable to parse SBOM for image {}", image);
+                containers.forEach(c -> {
+                    c.setStatus(Classification.Status.FAILED);
+                    c.setErrorMessage("Unable to parse SBOM");
+                });
             }
         }
-        containerRepository.save(container);
+
+        containerRepository.saveAll(containers);
     }
 
     private List<Workload> fetchWorkloads(ApiClient kubernetesClient, List<String> namespaces, List<String> excludeNamespaces)

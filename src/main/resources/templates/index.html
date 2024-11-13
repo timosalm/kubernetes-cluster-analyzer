@@ -47,7 +47,7 @@
                                 <div id="container-registry-credentials">
                                     <div>
                                         <div>
-                                            <input class="clr-input" type="text" name="registryCredentials[0].server" placeholder="URL without http(s) prefix" oninput="checkForNewRow(event)" />
+                                            <input class="clr-input" type="text" name="registryCredentials[0].url" placeholder="URL without http(s) prefix" oninput="checkForNewRow(event)" />
                                             <input class="clr-input" type="text" name="registryCredentials[0].username" placeholder="Username" oninput="checkForNewRow(event)" />
                                             <input class="clr-input" type="password" name="registryCredentials[0].password" placeholder="Password" oninput="checkForNewRow(event)"/>
                                         </div>
@@ -79,7 +79,7 @@
         let newRow = document.createElement("div");
         newRow.innerHTML = `
                 <div>
-                    <input class="clr-input" type="text" name="registryCredentials[${index}].server" placeholder="URL without http(s) prefix" oninput="checkForNewRow(event)"/>
+                    <input class="clr-input" type="text" name="registryCredentials[${index}].url" placeholder="URL without http(s) prefix" oninput="checkForNewRow(event)"/>
                     <input class="clr-input" type="text" name="registryCredentials[${index}].username" placeholder="Username" oninput="checkForNewRow(event)"/>
                     <input class="clr-input" type="password" name="registryCredentials[${index}].password" placeholder="Password" oninput="checkForNewRow(event)"/>
                 </div>
