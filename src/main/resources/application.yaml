@@ -11,11 +11,11 @@ spring:
 analyzer:
   excluded-namespaces: kube-node-lease,kube-public,kube-system
   sbom-classifiers:
-  - name: "dotnetcore"
+  - name: "dotnet"
     type: "Programming Language"
     sub-type: "C#"
     technology: ".NET Core"
-    regex: 'Microsoft\.NETCore\.App\.Runtime\..*'
+    regex: 'dotnet'
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/dotnet-core-index.html"
   - name: "python"
@@ -23,6 +23,13 @@ analyzer:
     sub-type: "Python"
     technology: "Flask"
     regex: "Flask"
+    fit: 1
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/python-index.html"
+  - name: "python"
+    type: "Programming Language"
+    sub-type: "Python"
+    technology: ""
+    regex: "python"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/python-index.html"
   - name: "react"
@@ -39,6 +46,13 @@ analyzer:
     regex: "express"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
+  - name: "react"
+    type: "Programming Language"
+    sub-type: "JavaScript"
+    technology: ""
+    regex: "javascript"
+    fit: 1
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
   - name: "node"
     type: "Programming Language"
     sub-type: "JavaScript"
@@ -46,39 +60,18 @@ analyzer:
     regex: "node"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
-  - name: "npm"
-    type: "Programming Language"
-    sub-type: "JavaScript"
-    technology: "npm"
-    regex: "npm"
-    fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
   - name: "golang"
     type: "Programming Language"
     sub-type: "GO"
     technology: "Golang"
-    regex: ".*go.*"
+    regex: "go"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/go-index.html"
-  - name: "golang"
-    type: "Programming Language"
-    sub-type: "GO"
-    technology: "Golang"
-    regex: ".*ko-app.*"
-    fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/go-index.html"
-  - name: "python"
-    type: "Programming Language"
-    sub-type: "Python"
-    technology: "Python"
-    regex: ".*python.*"
-    fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/python-index.html"
   - name: "ruby"
     type: "Programming Language"
     sub-type: "Ruby"
     technology: "Ruby"
-    regex: ".*ruby.*"
+    regex: "ruby"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/ruby-index.html"
   - name: "spring-boot"
@@ -96,6 +89,20 @@ analyzer:
     regex: "spring-framework"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/java-index.html"
+  - name: "java"
+    type: "Programming Language"
+    sub-type: "Java"
+    technology: ""
+    regex: "java"
+    fit: 1
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/java-index.html"
+  - name: "rust"
+    type: "Programming Language"
+    sub-type: "Rust"
+    technology: ""
+    regex: "rust"
+    fit: 3
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/deploy-apps-push-docker.html"
   - name: "tomcat"
     type: "Web Server"
     sub-type: "HTTP"
@@ -669,6 +676,13 @@ analyzer:
     sub-type: "Logging"
     technology: "Fluentd"
     regex: ".*fluentd.*"
+    fit: 1
+    documentation: "https://docs.anynines.com/docs/application-developer/a9s-logme2/"
+  - name: "fluent-bit"
+    type: "Observability"
+    sub-type: "Logging"
+    technology: "Fluent Bit"
+    regex: ".* fluent-bit.*"
     fit: 1
     documentation: "https://docs.anynines.com/docs/application-developer/a9s-logme2/"
   - name: "logstash"

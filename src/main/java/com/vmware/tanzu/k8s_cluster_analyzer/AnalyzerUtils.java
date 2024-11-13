@@ -1,6 +1,7 @@
 package com.vmware.tanzu.k8s_cluster_analyzer;
 
 import org.cyclonedx.exception.ParseException;
+import org.cyclonedx.model.Property;
 import org.cyclonedx.parsers.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +68,12 @@ public class AnalyzerUtils {
         var matchedClassifiers = new ArrayList<Classifier>();
         var classifications = new ArrayList<Classification>();
         parsedSBom.getComponents().forEach(component -> {
+            var detectedLanguage = component.getProperties().stream()
+                    .filter(p -> p.getName().equals("syft:package:language"))
+                    .map(Property::getValue).findFirst().orElse("");
             for (Classifier classifier : classifiers) {
-                if (Pattern.compile(classifier.regex()).matcher(component.getName()).matches()) {
+                var pattern = Pattern.compile(classifier.regex());
+                if (pattern.matcher(component.getName()).matches() || pattern.matcher(detectedLanguage).matches()) {
                     if (!matchedClassifiers.contains(classifier)) {
                         matchedClassifiers.add(classifier);
                         classifications.add(Classification.from(classifier, component.getVersion()));
