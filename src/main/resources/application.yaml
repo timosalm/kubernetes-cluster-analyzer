@@ -56,7 +56,7 @@ analyzer:
   - name: "node"
     type: "Programming Language"
     sub-type: "JavaScript"
-    technology: "Node"
+    technology: "NodeJS"
     regex: "node"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
@@ -112,7 +112,7 @@ analyzer:
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/java-index.html"
   - name: "nodejs"
     type: "Programming Language"
-    sub-type: "NodeJS"
+    sub-type: "JavaScript"
     technology: "NodeJS"
     regex: ".*node.*"
     fit: 1
