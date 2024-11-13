@@ -84,7 +84,7 @@ public class AnalyzerUtils {
                 }
             }
         });
-        return classifications;
+        return Classification.deduplicate(classifications);
     }
 
     private static boolean isMacOs() {

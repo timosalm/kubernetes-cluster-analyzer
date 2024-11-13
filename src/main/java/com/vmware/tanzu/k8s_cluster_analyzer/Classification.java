@@ -5,7 +5,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 public class Classification {
@@ -69,6 +74,25 @@ public class Classification {
     public static Classification from(Classifier classifier, String technologyVersion) {
         return new Classification(classifier.type(), classifier.subType(), classifier.technology(), Fit.values()[classifier.fit()],
                 classifier.documentation(), technologyVersion, classifier.notes());
+    }
+
+    public static List<Classification> deduplicate(List<Classification> classifications) {
+        return classifications.stream()
+                .collect(Collectors.groupingBy(classification ->
+                                Arrays.asList(classification.getType(), classification.getSubType()),
+                        Collectors.maxBy(Comparator.comparingInt(Classification::getPriority))
+                ))
+                .values().stream()
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
+    }
+
+    private int getPriority() {
+        int priority = 0;
+        if (technology != null && !technology.isEmpty()) priority++;
+        if (technologyVersion != null && !technologyVersion.isEmpty()) priority+=2;
+        if (notes != null && !notes.isEmpty()) priority++;
+        return priority;
     }
 
     public UUID getId() {

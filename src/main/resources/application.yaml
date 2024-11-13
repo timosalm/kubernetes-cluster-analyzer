@@ -15,10 +15,10 @@ analyzer:
     type: "Programming Language"
     sub-type: "C#"
     technology: ".NET Core"
-    regex: 'dotnet'
+    regex: "dotnet"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/dotnet-core-index.html"
-  - name: "python"
+  - name: "flask"
     type: "Programming Language"
     sub-type: "Python"
     technology: "Flask"
@@ -46,7 +46,7 @@ analyzer:
     regex: "express"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/web-servers.html"
-  - name: "react"
+  - name: "javascript"
     type: "Programming Language"
     sub-type: "JavaScript"
     technology: ""
@@ -63,14 +63,14 @@ analyzer:
   - name: "golang"
     type: "Programming Language"
     sub-type: "GO"
-    technology: "Golang"
+    technology: ""
     regex: "go"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/go-index.html"
   - name: "ruby"
     type: "Programming Language"
     sub-type: "Ruby"
-    technology: "Ruby"
+    technology: ""
     regex: "ruby"
     fit: 1
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/ruby-index.html"
