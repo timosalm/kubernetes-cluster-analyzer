@@ -72,11 +72,14 @@ public class AnalyzerUtils {
                     .filter(p -> p.getName().equals("syft:package:language"))
                     .map(Property::getValue).findFirst().orElse("");
             for (Classifier classifier : classifiers) {
-                var pattern = Pattern.compile(classifier.regex());
-                if (pattern.matcher(component.getName()).matches() || pattern.matcher(detectedLanguage).matches()) {
-                    if (!matchedClassifiers.contains(classifier)) {
+                if (!matchedClassifiers.contains(classifier)) {
+                    var pattern = Pattern.compile(classifier.regex());
+                    if (pattern.matcher(component.getName()).matches()) {
                         matchedClassifiers.add(classifier);
                         classifications.add(Classification.from(classifier, component.getVersion()));
+                    } else if (pattern.matcher(detectedLanguage).matches()) {
+                        matchedClassifiers.add(classifier);
+                        classifications.add(Classification.from(classifier, null));
                     }
                 }
             }

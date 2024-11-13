@@ -38,13 +38,13 @@ input[type=text] {
 }
 
 .chart {
-    margin-bottom: -8em;
+    margin-bottom: -6em;
     overflow: hidden;
 }
 
 .chart > div:first-child {
     position: relative;
-    top: -3rem;
+    top: -2rem;
 }
 
 .chart-headline {
