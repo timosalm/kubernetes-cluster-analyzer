@@ -2,6 +2,8 @@ package com.vmware.tanzu.k8s_cluster_analyzer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
@@ -14,6 +16,7 @@ import java.util.UUID;
 public class Analysis implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private LocalDateTime createdAt;
     @OneToMany(cascade = {CascadeType.ALL})
@@ -21,7 +24,6 @@ public class Analysis implements Serializable {
     private String kubernetesContext;
 
     public Analysis(String kubernetesContext, List<Workload> workloads) {
-        this.id = UUID.randomUUID();
         this.createdAt = LocalDateTime.now();
         this.workloads = workloads;
         this.kubernetesContext = kubernetesContext;

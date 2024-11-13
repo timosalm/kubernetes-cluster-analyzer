@@ -37,12 +37,12 @@ input[type=text] {
     justify-content: center;
 }
 
-#container-category-chart {
+.chart {
     margin-bottom: -8em;
     overflow: hidden;
 }
 
-#container-category-chart > div:first-child {
+.chart > div:first-child {
     position: relative;
     top: -3rem;
 }

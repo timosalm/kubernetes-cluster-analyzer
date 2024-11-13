@@ -1,6 +1,8 @@
 package com.vmware.tanzu.k8s_cluster_analyzer;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import java.util.UUID;
@@ -37,6 +39,7 @@ public class Classification {
     }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String type;
     private String subType;
@@ -48,7 +51,6 @@ public class Classification {
 
     public Classification(String type, String subType, String technology, Fit fit, String documentation, String technologyVersion, String notes) {
         this.notes = notes;
-        this.id = UUID.randomUUID();
         this.type = type;
         this.subType = subType;
         this.technology = technology;

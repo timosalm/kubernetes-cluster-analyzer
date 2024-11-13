@@ -3,6 +3,8 @@ package com.vmware.tanzu.k8s_cluster_analyzer;
 import io.kubernetes.client.openapi.models.V1Container;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
@@ -16,6 +18,7 @@ import java.util.UUID;
 public class Container implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String name;
     private String image;
@@ -30,7 +33,6 @@ public class Container implements Serializable {
     private String errorMessage;
 
     public Container(String name, String image) {
-        this.id = UUID.randomUUID();
         this.name = name;
         this.image = image;
         this.status = Classification.Status.PENDING;

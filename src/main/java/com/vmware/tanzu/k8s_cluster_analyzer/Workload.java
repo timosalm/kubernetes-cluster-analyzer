@@ -7,10 +7,10 @@ import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.openapi.models.V1Volume;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
 import java.util.List;
@@ -20,9 +20,8 @@ import java.util.regex.Pattern;
 @Entity
 public class Workload {
 
-    private static final Logger log = LoggerFactory.getLogger(Workload.class);
-
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String name;
     private String namespace;
@@ -36,7 +35,6 @@ public class Workload {
 
     public Workload(String name, String namespace, Type type, int replicas, boolean hasPvc,
                     boolean isManagedByHelm, List<Container> containers) {
-        this.id = UUID.randomUUID();
         this.name = name;
         this.namespace = namespace;
         this.type = type;
