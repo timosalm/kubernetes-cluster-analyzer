@@ -7,10 +7,35 @@ spring:
     url: jdbc:h2:mem:CLUSTER_ANALYZER
     hikari.auto-commit: false
   config.import: "optional:configserver:"
+management.endpoints.web.exposure.include: refresh
 
 analyzer:
   excluded-namespaces: kube-node-lease,kube-public,kube-system
+  formatted-analyzer-intro: |
+    The application fetches relevant information about workloads for classification and calculation of the compatibility with <a href="https://www.cloudfoundry.org" target="_blank">Cloud Foundry (CF)</a> from the Kubernetes API of the specified cluster and related container registry.<br /><br />    
+    The workloads will be categorized into different <b>levels of compatibility</b>.<br />
+    <ul>
+      <li><b>High</b>: CF provides first-class support for the technology either via <a href="https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/buildpacks-index.html" target="_blank">Buildpacks</a> or a backing service available in the marketplace.</li>
+      <li><b>Medium</b>: CF provides an alternative backing services in the marketplace.</li>
+      <li><b>Low</b>: CF doesn't provide first-class support for the technology</li>
+      <li><b>Not relevant</b>: Workloads that, for example, provide functionality for Kubernetes.</li>
+      <li><b>Unknown</b>: It was not possible to calculate the level of compatibility.</li>
+    </ul>
+    <br />
+    <b>If the compatibility of a workload is low or unknown, and it is <u>not a StatefulSet</u> that requires a PersistentVolume, you can still try to <a href="https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/deploy-apps-push-docker.html">run your prebuild container on CF</a></b>.
+    If it is a backing service, please reach out to the CF platform team and ask for advice.<br /><br />
+    The classification and calculated compatibility is just an indication. Don't hesitate to reach out to the CF platform team for further guidance.
+    <br /><br />
+    Neither the kubeconfig, nor the registry credentials will be stored! The analyzer will also not affect your workloads at runtime in any way!"
   sbom-classifiers:
+  - name: "perl"
+    type: "Programming Language"
+    sub-type: "Perl"
+    regex: "perl"
+    technology: ""
+    fit: 3
+    notes: "In addition to pushing it as a prebuilt container, using the following buildpack could also work. Examples for Perl are included. https://github.com/oetiker/sourcey-buildpack"
+    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/deploy-apps-push-docker.html"
   - name: "dotnet"
     type: "Programming Language"
     sub-type: "C#"
@@ -131,43 +156,36 @@ analyzer:
     sub-type: "Relational"
     technology: "MariaDB"
     regex: ".*mariadb.*"
-    fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/config-databases.html"
+    fit: 2
+    documentation: ""
   - name: "mysql"
     type: "Database"
     sub-type: "Relational"
     technology: "MySQL"
     regex: ".*mysqld.*"
     fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/config-databases.html"
+    documentation: ""
   - name: "msql"
     type: "Database"
     sub-type: "Relational"
     technology: "Microsoft SQL Server"
     regex: ".*mssql.*"
-    fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/config-databases.html"
+    fit: 2
+    documentation: ""
   - name: "sqlite"
     type: "Database"
     sub-type: "Relational"
     technology: "SQLite"
     regex: ".*sqlite.*"
-    fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/config-databases.html"
+    fit: 2
+    documentation: ""
   - name: "postgres"
     type: "Database"
     sub-type: "Relational"
     technology: "PostgreSQL"
     regex: ".*postgres.*"
     fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/config-databases.html"
-  - name: "msql"
-    type: "Database"
-    sub-type: "Relational"
-    technology: "Microsoft SQL Server"
-    regex: ".*mssql.*"
-    fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/config-databases.html"
+    documentation: ""
   # Database - Caching
   - name: "redis"
     type: "Database"
@@ -175,43 +193,43 @@ analyzer:
     technology: "Redis"
     regex: ".*redis.*"
     fit: 1
-    documentation: "https://docs.vmware.com/en/Redis-for-VMware-Tanzu-Application-Service/3.5/redis-tanzu-application-service/GUID-appdevs.html"
+    documentation: ""
   - name: "riak"
     type: "Database"
     sub-type: "Caching"
     technology: "Riak"
     regex: ".*riak.*"
-    fit: 0
+    fit: 2
     documentation: ""
   - name: "etcd"
     type: "Database"
     sub-type: "Caching"
     technology: "etcd"
     regex: ".*etcd.*"
-    fit: 0
+    fit: 2
     documentation: ""
   - name: "memcached"
     type: "Database"
     sub-type: "Caching"
     technology: "Memcached"
     regex: ".*memcached.*"
-    fit: 0
+    fit: 2
     documentation: ""
   - name: "hz"
     type: "Database"
     sub-type: "Caching"
     technology: "Hazelcast"
     regex: ".*hz .*"
-    fit: 0
+    fit: 2
     documentation: ""
   - name: "ignite"
     type: "Database"
     sub-type: "Caching"
     technology: "Apache Ignite"
     regex: ".*IGNITE.*"
-    fit: 0
+    fit: 2
     documentation: ""
-  ### No Sql Databse - document
+  ### No Sql Database - document
   - name: "mongodb"
     type: "Database"
     sub-type: "NoSQL - Document"
@@ -232,7 +250,7 @@ analyzer:
     technology: "Amazon DynamoDB"
     regex: ".*DynamoDB.*"
     fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Service-Broker-for-AWS/index.html"
+    documentation: ""
   - name: "couchbase"
     type: "Database"
     sub-type: "NoSQL - Document"
@@ -348,21 +366,21 @@ analyzer:
     technology: "Prometheus"
     regex: ".*prometheus.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
+    documentation: ""
   - name: "prometheus"
     type: "Database"
     sub-type: "Time Series"
     technology: "Prometheus"
     regex: ".*blackbox-exporter.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
+    documentation: ""
   - name: "prometheus"
     type: "Database"
     sub-type: "Time Series"
     technology: "Prometheus"
     regex: ".*/prom/.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
+    documentation: ""
   - name: "kairosdb"
     type: "Database"
     sub-type: "Time Series"
@@ -412,21 +430,21 @@ analyzer:
     technology: "Minio"
     regex: ".*minio.*"
     fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Service-Broker-for-AWS/index.html"
+    documentation: ""
   - name: "ceph"
     type: "Database"
     sub-type: "Object Storage"
     technology: "Ceph"
     regex: ".*ceph.*"
     fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Service-Broker-for-AWS/index.html"
+    documentation: ""
   - name: "swift"
     type: "Database"
     sub-type: "Object Storage"
     technology: "OpenStack Swift"
     regex: ".*swift.*"
     fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Service-Broker-for-AWS/index.html"
+    documentation: ""
   ### Processing - Search Engine
   - name: "elasticsearch"
     type: "Processing"
@@ -434,21 +452,21 @@ analyzer:
     technology: "Elasticsearch"
     regex: ".*elasticsearch.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-search/"
+    documentation: ""
   - name: "opensearch"
     type: "Processing"
     sub-type: "Search Engine"
     technology: "OpenSearch"
     regex: ".*opensearch.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-search/"
+    documentation: ""
   - name: "solr"
     type: "Processing"
     sub-type: "Search Engine"
     technology: "Apache Solr"
     regex: ".*solr.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-search/"
+    documentation: ""
   - name: "sphinx"
     type: "Processing"
     sub-type: "Search Engine"
@@ -490,7 +508,7 @@ analyzer:
     technology: "Apache Solar"
     regex: ".*solr-foreground.*"
     fit: 1
-    documentation: "https://docs.vmware.com/en/VMware-Tanzu-Service-Broker-for-AWS/index.html"
+    documentation: ""
   ### Processing - Distributed Computing
   - name: "spark"
     type: "Processing"
@@ -547,8 +565,9 @@ analyzer:
     sub-type: "Data Integration & ETL"
     technology: "Apache Kafka"
     regex: ".*kafka.*"
-    fit: 0
+    fit: 2
     documentation: ""
+    notes: "RabbitMQ is available as an alternative messaging and event streaming solution"
   - name: "nifi"
     type: "Processing"
     sub-type: "Data Integration & ETL"
@@ -620,14 +639,14 @@ analyzer:
     technology: "RabbitMQ"
     regex: ".*rabbitmq.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-messaging/"
+    documentation: ""
   - name: "activemq"
     type: "Messaging"
     sub-type: "Message Broker"
     technology: "Apache ActiveMQ"
     regex: ".*activemq.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-messaging/"
+    documentation: ""
   - name: "nats"
     type: "Messaging"
     sub-type: "Message Broker"
@@ -648,7 +667,7 @@ analyzer:
     technology: "MQTT"
     regex: ".*mqtt.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-messaging/"
+    documentation: ""
   - name: "stomp"
     type: "Messaging"
     sub-type: "Message Broker"
@@ -662,7 +681,7 @@ analyzer:
     technology: "AMQP"
     regex: ".*amqp.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-messaging/"
+    documentation: ""
   - name: "jms"
     type: "Messaging"
     sub-type: "Message Broker"
@@ -677,14 +696,14 @@ analyzer:
     technology: "Fluentd"
     regex: ".*fluentd.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-logme2/"
+    documentation: ""
   - name: "fluent-bit"
     type: "Observability"
     sub-type: "Logging"
     technology: "Fluent Bit"
     regex: ".* fluent-bit.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-logme2/"
+    documentation: ""
   - name: "logstash"
     type: "Observability"
     sub-type: "Logging"
@@ -747,7 +766,7 @@ analyzer:
     technology: "Grafana Loki"
     regex: ".*loki.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
+    documentation: ""
   ### Observability - Monitoring
   - name: "grafana"
     type: "Observability"
@@ -755,7 +774,7 @@ analyzer:
     technology: "Grafana"
     regex: ".*grafana.*"
     fit: 1
-    documentation: "https://docs.anynines.com/docs/application-developer/a9s-prometheus/"
+    documentation: ""
   ### Web Server - HTTP
   - name: "nginx"
     type: "Web Server"
@@ -776,14 +795,14 @@ analyzer:
     sub-type: "HTTP"
     technology: "Lighttpd"
     regex: ".*lighttpd.*"
-    fit: 0
+    fit: 2
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Buildpacks/services/tanzu-buildpacks/GUID-nginx-nginx-buildpack.html"
   - name: "caddy"
     type: "Web Server"
     sub-type: "HTTP"
     technology: "Caddy"
     regex: ".*caddy.*"
-    fit: 0
+    fit: 2
     documentation: "https://docs.vmware.com/en/VMware-Tanzu-Buildpacks/services/tanzu-buildpacks/GUID-nginx-nginx-buildpack.html"
   ### Webserver - Proxy
   - name: "haproxy"
@@ -834,15 +853,15 @@ analyzer:
     sub-type: "API Gateway"
     technology: "Kong"
     regex: ".*kong.*"
-    fit: 0
-    documentation: ""
+    fit: 2
+    documentation: "https://docs.vmware.com/en/Spring-Cloud-Gateway-for-VMware-Tanzu/index.html"
   - name: "gloo"
     type: "Networking"
     sub-type: "API Gateway"
     technology: "Gloo"
     regex: ".*gloo.*"
-    fit: 0
-    documentation: ""
+    fit: 2
+    documentation: "https://docs.vmware.com/en/Spring-Cloud-Gateway-for-VMware-Tanzu/index.html"
   - name: spring-cloud-gateway
     type: "Networking"
     sub-type: "API Gateway"
@@ -857,49 +876,63 @@ analyzer:
     sub-type: "Networking"
     technology: "Istio"
     regex: ".*istio.*"
-    fit: 0
+    fit: 4
     documentation: ""
   - name: csi
     type: "Kubernetes"
     sub-type: "Container Storage"
     technology: ""
     regex: ".*/csi-.*"
-    fit: 0
+    fit: 4
     documentation: ""
   - name: smbplugin
     type: "Kubernetes"
     sub-type: "Container Storage"
     technology: ""
     regex: ".*smbplugin.*"
-    fit: 0
+    fit: 4
     documentation: ""
   - name: kubernetes-event-exporter
     type: "Kubernetes"
     sub-type: "Observability"
     technology: "kubernetes-event-exporter"
     regex: ".*kubernetes-event-exporter.*"
-    fit: 0
+    fit: 4
     documentation: ""
   - name: kuberhealthy
     type: "Kubernetes"
     sub-type: "Observability"
     technology: "Kuberhealthy"
     regex: ".*kuberhealthy.*"
-    fit: 0
+    fit: 4
     documentation: ""
   - name: ingress-controller
     type: "Kubernetes"
     sub-type: "Networking"
     technology: "Ingress Controller"
     regex: ".*ingress-controller.*"
-    fit: 0
+    fit: 4
     documentation: ""
   - name: ingress-controller
     type: "Kubernetes"
     sub-type: "Security"
     technology: "Cert Manager"
     regex: ".*cert-manager.*"
-    fit: 0
+    fit: 4
+    documentation: ""
+  - name: argo
+    type: "Kubernetes"
+    sub-type: "Continuous Delivery"
+    technology: "ArgoCD"
+    regex: ".*argocd.*"
+    fit: 4
+    documentation: ""
+  - name: dex
+    type: "Kubernetes"
+    sub-type: "Security"
+    technology: "Dex"
+    regex: ".*dexidp/dex.*"
+    fit: 4
     documentation: ""
   ### Misc
   - name: oauth2-proxy

@@ -63,15 +63,43 @@
                                     <tr>
                                         <th>Namespace</th>
                                         <th>Name</th>
-                                        <th>StatefulSet</th>
-                                        <th class="helm-column">Helm</th>
-                                        <th class="pvcs-column">PVCs</th>
+                                        <th>StatefulSet<br/>
+                                            <span id="stateful-tooltip" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                                <span class="tooltiptext">If a workload is deployed as a StatefulSet instead of a Deployment, it could be an indication (especially if PVCs are configured) that it's a stateful application like a database and, therefore, not a good candidate to be run on CloudFoundry if not available in the CF marketplace.</span>
+                                            </span>
+                                        </th>
+                                        <th class="helm-column">Helm<br/>
+                                            <span id="helm-tooltip" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                                <span class="tooltiptext">If workloads are managed by Helm, it could be an indication that it is a COTS application.</span>
+                                            </span>
+                                        </th>
+                                        <th class="pvcs-column">PVCs<br/>
+                                            <span id="pvc-tooltip" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                                <span class="tooltiptext">Persistent Volume Claims can be an indication that the workload is a stateful application like a database and, therefore, not a good candidate to be run on CloudFoundry if not available in the CF marketplace.</span>
+                                            </span>
+                                        </th>
                                         <th class="images-column">Images</th>
-                                        <th class="classification-column">Classification</th>
+                                        <th class="classification-column">Classification<br/>
+                                            <span id="classification-tooltip" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                                <span class="tooltiptext">The classification status of the workload can be either "Pending", "Failed" or "Completed". If a classification was not possible based on the available information, the status is "Completed". A failed status only indicates that something did not work as expected, for example, due to invalid or missing registry credentials.</span>
+                                            </span>
+                                        </th>
                                         <th class="category-column">Category</th>
                                         <th class="software-column">Software</th>
                                         <!--<th>CVEs</th>-->
-                                        <th class="compatibility-column">Compatibility<br/>with Cloud Foundry</th>
+                                        <th class="compatibility-column">Compatibility<br/>with Cloud Foundry<br/>
+                                            <span id="compatibility-column-tooltip" class="tooltip right-border"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                                                <span class="tooltiptext"><b>Levels of compatibility</b>:<br />
+                                                    <ul>
+                                                      <li><b>High</b>: CF provides first-class support for the technology either via <a href="https://docs.vmware.com/en/VMware-Tanzu-Application-Service/6.0/tas-for-vms/buildpacks-index.html" target="_blank">Buildpacks</a> or a backing services available in the marketplace.</li>
+                                                      <li><b>Medium</b>: CF provides an alternative backing service in the marketplace.</li>
+                                                      <li><b>Low</b>: CF doesn't provide first-class support for the technology</li>
+                                                      <li><b>Not relevant</b>: Workloads that, for example, provide functionality for Kubernetes.</li>
+                                                      <li><b>Unknown</b>: It was not possible to calculate the level of compatibility.</li>
+                                                    </ul>
+                                                </span>
+                                            </span>
+                                        </th>
                                     </tr>
                                     </thead>
                                     <tbody th:each="workload : ${analysis.workloads}" th:remove="tag">

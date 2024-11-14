@@ -30,7 +30,7 @@ public class Classification {
     }
 
     public enum Fit {
-        No("No"), HIGH("High"), MEDIUM("Medium"), Low("Low"), Unknown("Unknown");
+        No("No"), HIGH("High"), MEDIUM("Medium"), Low("Low"), NOT_RELEVANT("Not relevant"), Unknown("Unknown");
 
         private final String label;
         Fit(String label) {

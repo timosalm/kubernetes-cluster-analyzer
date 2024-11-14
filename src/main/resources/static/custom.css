@@ -62,15 +62,8 @@ input[type=text] {
     width: 10em;
 }
 
-#registry-credentials-label {
-    color: rgb(69, 69, 69);
-    font-weight: 600;
-    font-size: .7rem;
-    line-height: 1.2rem;
-}
-
 #container-registry-credentials > div:not(:first-child) {
-    margin-top: 0.5rem; /* Adjust the value to your desired margin */
+    margin-top: 0.5rem;
 }
 
 #error-page .card {
@@ -103,6 +96,9 @@ input[type=text] {
 }
 
 .tooltiptext {
+    font-weight: normal!important;
+    font-size: 0.7rem!important;
+    line-height: 1.0rem!important;
     visibility: hidden;
     width: 300px;
     background-color: black;
@@ -133,6 +129,16 @@ input[type=text] {
 .tooltip:hover .tooltiptext {
     visibility: visible;
     opacity: 1;
+}
+
+.right-border .tooltiptext {
+    left: 75%;
+    margin-left: -225px;
+}
+
+.right-border .tooltiptext::after {
+    left: 75%;
+    margin-left: -10px;
 }
 
 .clr-checkbox-wrapper .clr-control-label {
@@ -174,4 +180,12 @@ input[type=text] {
 
 .bold td {
     font-weight: bold!important;
+}
+
+.card-row {
+    align-items: center;
+}
+
+#home .clr-col {
+    max-width: 40rem!important;
 }
