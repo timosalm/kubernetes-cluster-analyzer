@@ -701,7 +701,7 @@ analyzer:
     type: "Observability"
     sub-type: "Logging"
     technology: "Fluent Bit"
-    regex: ".* fluent-bit.*"
+    regex: ".*fluent-bit.*"
     fit: 1
     documentation: ""
   - name: "logstash"
@@ -948,4 +948,5 @@ analyzer:
     technology: "Vault"
     regex: ".*vault.*"
     fit: 2
+    notes: "CredHub is available as an alternative solution"
     documentation: "https://docs.vmware.com/en/CredHub-Service-Broker/services/credhub/GUID-index.html"
