@@ -7,21 +7,25 @@
 <table>
     <tbody>
     <tr>
-        <td th:fragment="containerImageCellFragment(analysis, workload, container)">
-            <span th:text="${container.image}">Container image</span>
-            <a th:href="@{/analysis/{id}/workloads/{workloadId}/containers/{containerId}/sbom(id=${analysis.id},workloadId=${workload.id},containerId=${container.id})}"
-               th:target="_blank" th:if="${container.sBom != null}">
-                <img th:src="@{/images/sbom.png}" class="sbom-img" alt="SBOM Download">
-            </a>
-        </td>
+        <th:block th:fragment="containerImageCellFragment(analysis, workload, container, rowSpan)">
+            <td th:rowspan="${rowSpan}">
+                <span th:text="${container.image}">Container image</span>
+                <a th:href="@{/analysis/{id}/workloads/{workloadId}/containers/{containerId}/sbom(id=${analysis.id},workloadId=${workload.id},containerId=${container.id})}"
+                   th:target="_blank" th:if="${container.sBom != null}">
+                    <img th:src="@{/images/sbom.png}" class="sbom-img" alt="SBOM Download">
+                </a>
+            </td>
+        </th:block>
 
-        <td th:fragment="classificationStatusCellFragment(container)">
-            <span th:text="${container.status}">Classification status</span>
-            <span th:if="${container.errorMessage != null}" class="tooltip">
-                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
-                <span class="tooltiptext" th:text="${container.errorMessage}">Error message</span>
-            </span>
-        </td>
+        <th:block th:fragment="classificationStatusCellFragment(container, rowSpan)">
+            <td th:rowspan="${rowSpan}">
+                <span th:text="${container.status}">Classification status</span>
+                <span th:if="${container.errorMessage != null}" class="tooltip">
+                    <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
+                    <span class="tooltiptext" th:text="${container.errorMessage}">Error message</span>
+                </span>
+            </td>
+        </th:block>
 
         <td th:fragment="categoryCellFragment(classification)" th:class="${classification != null && #strings.equals(classification.type, 'Programming Language') ? 'bold' : ''}">
             <a th:href="${classification.documentation}"  th:target="_blank" th:if="${classification != null && !#strings.isEmpty(classification.documentation)}">

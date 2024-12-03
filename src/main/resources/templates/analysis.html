@@ -109,12 +109,10 @@
                                         <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${#strings.equals(workload.type, 'STATEFUL_SET')} ? 'Yes' : 'No'">Type</td>
                                         <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${workload.hasPvc} ? 'Yes' : 'No'">PVC</td>
                                         <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${workload.managedByHelm} ? 'Yes' : 'No'">Helm</td>
-                                        <td th:rowspan="${uiHelpers.getRowSpan(workload.containers[0])}"
-                                            th:replace="fragments/analysis :: containerImageCellFragment(analysis = ${analysis}, workload = ${workload}, container = ${workload.containers[0]})">
+                                        <td th:replace="fragments/analysis :: containerImageCellFragment(analysis = ${analysis}, workload = ${workload}, container = ${workload.containers[0]}, rowSpan = ${uiHelpers.getRowSpan(workload.containers[0])})">
                                             Container Image
                                         </td>
-                                        <td th:rowspan="${uiHelpers.getRowSpan(workload)}"
-                                            th:replace="fragments/analysis :: classificationStatusCellFragment(container = ${workload.containers[0]})">
+                                        <td th:replace="fragments/analysis :: classificationStatusCellFragment(container = ${workload.containers[0]}, rowSpan = ${uiHelpers.getRowSpan(workload.containers[0])})">
                                             Classification Status
                                         </td>
                                         <td th:replace="fragments/analysis :: categoryCellFragment(classification = ${uiHelpers.getFirstOrNull(workload.containers[0].classifications)})">
@@ -128,12 +126,10 @@
 
                                     <th:block th:each="container, containerStat : ${workload.containers}">
                                     <tr th:if="${containerStat.index > 0}">
-                                        <td th:rowspan="${uiHelpers.getRowSpan(container)}"
-                                            th:replace="fragments/analysis :: containerImageCellFragment(analysis = ${analysis}, workload = ${workload}, container = ${container})">
+                                        <td th:replace="fragments/analysis :: containerImageCellFragment(analysis = ${analysis}, workload = ${workload}, container = ${container}, rowSpan = ${uiHelpers.getRowSpan(container)})">
                                             Container Image
                                         </td>
-                                        <td th:rowspan="${uiHelpers.getRowSpan(container)}"
-                                            th:replace="fragments/analysis :: classificationStatusCellFragment(${container})">
+                                        <td th:replace="fragments/analysis :: classificationStatusCellFragment(container = ${container}, rowSpan = ${uiHelpers.getRowSpan(container)})">
                                             Classification Status
                                         </td>
                                         <td th:replace="fragments/analysis :: categoryCellFragment(classification = ${uiHelpers.getFirstOrNull(container.classifications)})">
