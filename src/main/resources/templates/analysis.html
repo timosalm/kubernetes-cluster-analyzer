@@ -101,7 +101,8 @@
                                         </th>
                                     </tr>
                                     </thead>
-                                    <tbody th:each="workload : ${analysis.workloads}">
+                                    <tbody>
+                                    <th:block th:each="workload : ${analysis.workloads}">
                                     <tr>
                                         <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${workload.namespace}">Namespace</td>
                                         <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${workload.name}">Name</td>
@@ -150,6 +151,7 @@
                                             Classification Technology
                                         </td>
                                     </tr>
+                                    </th:block>
                                     </th:block>
                                     </tbody>
                                 </table>

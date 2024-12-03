@@ -28,6 +28,10 @@
                 <span th:text="${uiHelpers.getFormattedClassificationType(classification)}">Container image category</span>
             </a>
             <span th:text="${uiHelpers.getFormattedClassificationType(classification)}" th:if="${classification != null && #strings.isEmpty(classification.documentation)}">Container image category</span>
+            <span class="tooltip" th:if="${classification != null}">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path><text x="18" y="22" text-anchor="middle" font-size="12" font-family="Georgia, serif" font-weight="bold">C</text></svg>
+                <span class="tooltiptext" th:utext="'Compatibility with Cloud Foundry<br /><b>' + ${classification.fit} + '</b>'">Classification Compatibility</span>
+            </span>
         </td>
 
         <td th:fragment="technologyCellFragment(classification)" th:class="${classification != null && #strings.equals(classification.type, 'Programming Language') ? 'bold' : ''}">
