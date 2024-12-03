@@ -37,6 +37,8 @@ input[type=text] {
     justify-content: center;
 }
 
+
+
 .chart {
     margin-bottom: -6em;
     overflow: hidden;
@@ -71,12 +73,17 @@ input[type=text] {
     border: none;
     box-shadow: none;
     text-align: center;
+    max-width: 30rem;
+    color: rgb(106, 122, 129)!important;
+    font-weight: 100 !important;
 }
 
-.error-text {
-    color: rgb(106, 122, 129)!important;
+.error-type {
     font-size: 2rem !important;
-    font-weight: 100 !important;
+}
+
+.error-message {
+    font-size: 1rem !important;
 }
 
 .cf-compatibility-cell {
@@ -145,28 +152,13 @@ input[type=text] {
     font-weight: bold;
 }
 
-.helm-column {
-    width: 54px;
-}
-
-.pvcs-column {
-    width: 54px;
-}
-
-.compatibility-column {
-    width: 54px;
-}
-
-.classification-column {
-    width: 100px
-}
-
 .table-wrapper {
     padding: 0!important;
 }
 
 #workloads-table {
     text-align: center!important;
+    border-collapse: collapse;
 }
 
 #workloads-table td,
@@ -188,4 +180,8 @@ input[type=text] {
 
 #home .clr-col {
     max-width: 40rem!important;
+}
+
+.table tbody tr:first-child td {
+    border-top: 1px rgb(232, 232, 232) solid!important;
 }

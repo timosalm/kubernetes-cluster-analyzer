@@ -8,6 +8,7 @@ spring:
     hikari.auto-commit: false
   config.import: "optional:configserver:"
 management.endpoints.web.exposure.include: refresh
+server.error.include-message: always
 
 analyzer:
   excluded-namespaces: kube-node-lease,kube-public,kube-system

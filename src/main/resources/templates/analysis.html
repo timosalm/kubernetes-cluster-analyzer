@@ -86,7 +86,6 @@
                                         </th>
                                         <th class="category-column">Category</th>
                                         <th class="software-column">Software</th>
-                                        <!--<th>CVEs</th>-->
                                         <th class="compatibility-column">Compatibility<br/>with Cloud Foundry<br/>
                                             <span id="compatibility-column-tooltip" class="tooltip right-border"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
                                                 <span class="tooltiptext"><b>Levels of compatibility</b>:<br />
@@ -102,67 +101,57 @@
                                         </th>
                                     </tr>
                                     </thead>
-                                    <tbody th:each="workload : ${analysis.workloads}" th:remove="tag">
+                                    <tbody th:each="workload : ${analysis.workloads}">
                                     <tr>
-                                        <td th:text="${workload.namespace}">Namespace</td>
-                                        <td th:text="${workload.name}">Name</td>
-                                        <td th:text="${#strings.equals(workload.type, 'STATEFUL_SET')} ? 'Yes' : 'No'">Type</td>
-                                        <td th:text="${workload.hasPvc} ? 'Yes' : 'No'">PVC</td>
-                                        <td th:text="${workload.managedByHelm} ? 'Yes' : 'No'">Helm</td>
-                                        <td colspan="4" class="table-wrapper">
-                                            <table class="nested-table">
-                                                <tbody th:each="container : ${workload.containers}" th:remove="tag">
-                                                <tr>
-                                                    <td class="images-column">
-                                                        <span th:text="${container.image}">Container image</span>
-                                                        <a th:href="@{/analysis/{id}/workloads/{workloadId}/containers/{containerId}/sbom(id=${analysis.id},workloadId=${workload.id},containerId=${container.id})}"
-                                                           th:target="_blank" th:if="${container.sBom != null}">
-                                                            <img th:src="@{/images/sbom.png}" class="sbom-img" alt="SBOM Download">
-                                                        </a>
-                                                    </td>
-                                                    <td class="classification-column">
-                                                        <span th:text="${container.status}">Classification status</span>
-                                                        <span th:if="${container.errorMessage != null}" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
-                                                            <span class="tooltiptext" th:text="${container.errorMessage}">Error message</span>
-                                                        </span>
-                                                    </td>
-                                                    <td colspan="2" class="table-wrapper">
-                                                        <table class="nested-table classification-table">
-                                                            <tbody th:each="classification : ${container.classifications}" th:remove="tag">
-                                                            <tr th:class="${#strings.equals(classification.type, 'Programming Language') ? 'bold' : ''}">
-                                                                <td class="category-column">
-                                                                    <a th:href="${classification.documentation}"  th:target="_blank" th:if="${!#strings.isEmpty(classification.documentation)}">
-                                                                        <span th:text="${classification.type} + ' - ' + ${classification.subType}">Container image category</span>
-                                                                    </a>
-                                                                    <span th:text="${classification.type} + ' - ' + ${classification.subType}" th:if="${#strings.isEmpty(classification.documentation)}">Container image category</span>
-                                                                </td>
-                                                                <td class="software-column">
-                                                                    <a th:href="${classification.documentation}"  th:target="_blank" th:if="${!#strings.isEmpty(classification.documentation)}">
-                                                                        <span th:text="${classification.technology} + ' ' + (${classification.technologyVersion} ?: '')" th:if="${classification.technology != null}">Classification technology</span>
-                                                                    </a>
-                                                                    <span th:text="${classification.technology} + ' ' + (${classification.technologyVersion} ?: '')" th:if="${classification.technology != null && #strings.isEmpty(classification.documentation)}">Classification technology</span>
-                                                                    <span th:if="${classification.notes != null}" class="tooltip"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="17.93" cy="11.9" r="1.4"></circle><path d="M21,23H19V15H16a1,1,0,0,0,0,2h1v6H15a1,1,0,1,0,0,2h6a1,1,0,0,0,0-2Z"></path><path d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"></path></svg>
-                                                                        <span class="tooltiptext" th:text="${classification.notes}">Notes</span>
-                                                                    </span>
-                                                                </td>
-                                                            </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                    <!--
-                                                    <td>
-                                                        <div th:if="${container.totalCveCount != null && container.totalCveCount > 0}"  th:text="${'Total ' + container.totalCveCount + ' (CRITICAL: ' + container.criticalCveCount + ', HIGH: ' + container.highCveCount + ')'}">Container CVE Count</div>
-                                                    </td>
-                                                    -->
-
-                                                </tr>
-                                                </tbody>
-                                            </table>
+                                        <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${workload.namespace}">Namespace</td>
+                                        <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${workload.name}">Name</td>
+                                        <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${#strings.equals(workload.type, 'STATEFUL_SET')} ? 'Yes' : 'No'">Type</td>
+                                        <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${workload.hasPvc} ? 'Yes' : 'No'">PVC</td>
+                                        <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${workload.managedByHelm} ? 'Yes' : 'No'">Helm</td>
+                                        <td th:rowspan="${uiHelpers.getRowSpan(workload.containers[0])}"
+                                            th:replace="fragments/analysis :: containerImageCellFragment(analysis = ${analysis}, workload = ${workload}, container = ${workload.containers[0]})">
+                                            Container Image
                                         </td>
-                                        <td class="cf-compatibility-cell">
-                                            <div th:text="${workload.getCompatibility()}">CF fit</div>
+                                        <td th:rowspan="${uiHelpers.getRowSpan(workload)}"
+                                            th:replace="fragments/analysis :: classificationStatusCellFragment(container = ${workload.containers[0]})">
+                                            Classification Status
+                                        </td>
+                                        <td th:replace="fragments/analysis :: categoryCellFragment(classification = ${uiHelpers.getFirstOrNull(workload.containers[0].classifications)})">
+                                            Classification Category
+                                        </td>
+                                        <td th:replace="fragments/analysis :: technologyCellFragment(classification = ${uiHelpers.getFirstOrNull(workload.containers[0].classifications)})">
+                                            Classification Technology
+                                        </td>
+                                        <td th:rowspan="${uiHelpers.getRowSpan(workload)}" th:text="${workload.getCompatibility()}">CF Fit</td>
+                                    </tr>
+
+                                    <th:block th:each="container, containerStat : ${workload.containers}">
+                                    <tr th:if="${containerStat.index > 0}">
+                                        <td th:rowspan="${uiHelpers.getRowSpan(container)}"
+                                            th:replace="fragments/analysis :: containerImageCellFragment(analysis = ${analysis}, workload = ${workload}, container = ${container})">
+                                            Container Image
+                                        </td>
+                                        <td th:rowspan="${uiHelpers.getRowSpan(container)}"
+                                            th:replace="fragments/analysis :: classificationStatusCellFragment(${container})">
+                                            Classification Status
+                                        </td>
+                                        <td th:replace="fragments/analysis :: categoryCellFragment(classification = ${uiHelpers.getFirstOrNull(container.classifications)})">
+                                            Classification Category
+                                        </td>
+                                        <td th:replace="fragments/analysis :: technologyCellFragment(classification = ${uiHelpers.getFirstOrNull(container.classifications)})">
+                                            Classification Technology
                                         </td>
                                     </tr>
+                                    <tr th:each="classification, classificationStat : ${container.classifications}" th:if="${classificationStat.index > 0}">
+                                        <td th:replace="fragments/analysis :: categoryCellFragment(classification = ${uiHelpers.getFirstOrNull(classification)})">
+                                            Classification Category
+                                        </td>
+                                        <td th:replace="fragments/analysis :: technologyCellFragment(classification = ${uiHelpers.getFirstOrNull(classification)})">
+                                            Classification Technology
+                                        </td>
+                                    </tr>
+                                    </th:block>
+                                    </tbody>
                                 </table>
                             </div>
                             <script type="text/javascript" th:inline="javascript">
@@ -189,7 +178,7 @@
                                     var containerProgrammingLanguagesChartData = new google.visualization.DataTable();
                                     containerProgrammingLanguagesChartData.addColumn('string', 'Category');
                                     containerProgrammingLanguagesChartData.addColumn('number', 'Containers');
-                                    containerProgrammingLanguagesChartData.addRows([[${containerProgrammingLanguagesChartData}]]);
+                                    containerProgrammingLanguagesChartData.addRows([[${uiHelpers.getContainerProgrammingLanguagesChartData()}]]);
 
                                     var containerProgrammingLanguagesChart = new google.visualization.PieChart(document.getElementById('container-programming-languages-chart'));
                                     containerProgrammingLanguagesChart.draw(containerProgrammingLanguagesChartData, options);
@@ -197,7 +186,7 @@
                                     var containerCategoriesChartData = new google.visualization.DataTable();
                                     containerCategoriesChartData.addColumn('string', 'Category');
                                     containerCategoriesChartData.addColumn('number', 'Containers');
-                                    containerCategoriesChartData.addRows([[${containerCategoriesChartData}]]);
+                                    containerCategoriesChartData.addRows([[${uiHelpers.getContainerCategoriesChartData()}]]);
 
                                     var containerCategoriesChart = new google.visualization.PieChart(document.getElementById('container-category-chart'));
                                     containerCategoriesChart.draw(containerCategoriesChartData, options);
@@ -205,27 +194,11 @@
                                     var containerCompatibilityChartData = new google.visualization.DataTable();
                                     containerCompatibilityChartData.addColumn('string', 'Compatibility');
                                     containerCompatibilityChartData.addColumn('number', 'Containers');
-                                    containerCompatibilityChartData.addRows([[${containerCompatibilityChartData}]]);
+                                    containerCompatibilityChartData.addRows([[${uiHelpers.getContainerCompatibilityChartData()}]]);
 
                                     var containerCompatibilityChart = new google.visualization.PieChart(document.getElementById('container-compatibility-chart'));
                                     containerCompatibilityChart.draw(containerCompatibilityChartData, options);
                                 }
-                            </script>
-                            <script type="text/javascript" th:inline="javascript">
-                                function adjustColumnsWithClass(cssClass) {
-                                    const imageColumns = document.querySelectorAll(cssClass);
-                                    const maxWidth = Math.max(...Array.from(imageColumns).map(c => c.offsetWidth));
-                                    imageColumns.forEach(c => c.style.width = `${maxWidth}px`);
-                                }
-
-                                function adjustTable() {
-                                    adjustColumnsWithClass(".images-column");
-                                    adjustColumnsWithClass(".software-column");
-                                    adjustColumnsWithClass(".category-column");
-                                }
-
-                                adjustTable();
-                                window.addEventListener("resize", adjustTable);
                             </script>
                         </div>
                     </div>
@@ -236,15 +209,19 @@
 </div>
 <script type="text/javascript" th:inline="javascript">
     let scrollPosition = {x: 0, y:0};
-
-    document.body.addEventListener("htmx:beforeRequest", (event) => {
-        var contentContainer = document.getElementById("analysis-content");
+    let chartsContainerMinHeight;
+    document.body.addEventListener("htmx:beforeRequest", () => {
+        const contentContainer = document.getElementById("analysis-content");
         scrollPosition.x = contentContainer.scrollLeft;
         scrollPosition.y = contentContainer.scrollTop;
+
+        chartsContainerMinHeight = document.getElementById("charts").offsetHeight + "px";
     });
 
-    document.body.addEventListener("htmx:afterSettle", (event) => {
-        var contentContainer = document.getElementById("analysis-content");
+    document.body.addEventListener("htmx:afterSwap", () => {
+        document.getElementById("charts").style.minHeight = chartsContainerMinHeight;
+
+        const contentContainer = document.getElementById("analysis-content");
         contentContainer.scrollTo(scrollPosition.x, scrollPosition.y);
     });
 
