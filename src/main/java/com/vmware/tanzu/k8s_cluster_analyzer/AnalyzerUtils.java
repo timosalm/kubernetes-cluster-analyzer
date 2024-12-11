@@ -6,6 +6,7 @@ import org.cyclonedx.parsers.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,44 +23,48 @@ public class AnalyzerUtils {
 
     private static final Logger log = LoggerFactory.getLogger(AnalyzerUtils.class);
 
-    public static String generateSBom(String containerImage, List<RegistryCredentials> registryCredentials) throws IOException, InterruptedException, GenerateSBomExeption {
-        for (RegistryCredentials creds : registryCredentials) {
-            var process =  runSyftProcess(containerImage, creds);
+    public static String generateSBom(String containerImageTag, List<RegistryCredentials> registryCredentials) throws IOException, InterruptedException, GenerateSBomExeption {
+        validateIsSafeForUseInCommand(containerImageTag);
 
-            var builder = new StringBuilder();
+        for (RegistryCredentials creds : registryCredentials) {
+            var process =  runSyftProcess(containerImageTag, creds);
+
+            var consoleOutput = new StringBuilder();
             try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    builder.append(line);
+                    consoleOutput.append(line);
                 }
             }
 
             var returnCode = process.waitFor();
             if (returnCode == 0) {
-                return builder.toString();
+                return consoleOutput.toString();
             } else {
-                log.warn("Syft failed for container {} with return code {} and error {}", containerImage, returnCode, builder);
+                log.warn("Syft failed for container {} with return code {} and message {}", containerImageTag, returnCode, consoleOutput);
             }
         }
 
-        throw new GenerateSBomExeption(containerImage);
+        throw new GenerateSBomExeption("SBOM generation failed for container " + containerImageTag);
     }
 
-    private static Process runSyftProcess(String containerImage, RegistryCredentials registryCredentials) throws IOException {
+    private static Process runSyftProcess(String containerImageTag, RegistryCredentials registryCredentials) throws IOException {
         var syftExecutable = new ClassPathResource(isMacOs() ? "syft/syft-mac-arm" : "syft/syft").getFile();
-        var command = new ArrayList<String>();
-        command.add(syftExecutable.getPath());
-        command.add(containerImage);
-        command.add("-o");
-        command.add("cyclonedx-json");
-        command.add("--quiet");
-
-        var processBuilder = new ProcessBuilder(command);
+        var processBuilder = new ProcessBuilder(syftExecutable.getPath(), containerImageTag, "-o", "cyclonedx-json", "--quiet");
         processBuilder.redirectErrorStream(true);
         processBuilder.environment().put("SYFT_REGISTRY_AUTH_AUTHORITY", registryCredentials.getServer());
         processBuilder.environment().put("SYFT_REGISTRY_AUTH_USERNAME", registryCredentials.getUsername());
         processBuilder.environment().put("SYFT_REGISTRY_AUTH_PASSWORD", registryCredentials.getPassword());
         return processBuilder.start();
+    }
+
+    private static void validateIsSafeForUseInCommand(String containerImageTag) throws GenerateSBomExeption {
+        var dockerImageName  = DockerImageName.parse(containerImageTag);
+        try {
+            dockerImageName.assertValid();
+        } catch (Exception e) {
+            throw new GenerateSBomExeption("Invalid container image tag format " + containerImageTag);
+        }
     }
 
     public static List<Classification> classifySBom(String sBom, List<Classifier> classifiers) throws ParseException {
@@ -91,10 +96,10 @@ public class AnalyzerUtils {
         return System.getProperty("os.name").toLowerCase().contains("mac");
     }
 
-    public static List<RegistryCredentials> getRelevantRegistryCredentials(String containerImage,
+    public static List<RegistryCredentials> getRelevantRegistryCredentials(String containerImageTag,
                                                                            List<RegistryCredentials> registryCredentials) {
         var relevantRegistryCredentials = registryCredentials.stream()
-                .filter(credential -> containerImage.startsWith(credential.getUrl()))
+                .filter(credential -> containerImageTag.startsWith(credential.getUrl()))
                 .sorted(Comparator.comparingInt((RegistryCredentials c) -> c.getUrl().length()).reversed())
                 .collect(Collectors.toList());
         relevantRegistryCredentials.add(new RegistryCredentials("","",""));

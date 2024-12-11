@@ -72,9 +72,9 @@ public class AnalysisFormData {
         }
 
         return registryCredentials.stream().filter(credentials ->
-                credentials.getUrl() != null && !credentials.getUrl().isEmpty() &&
-                        credentials.getUsername() != null && !credentials.getUsername().isEmpty() &&
-                        credentials.getPassword() != null && !credentials.getPassword().isEmpty()
+                credentials.getUrl() != null && !credentials.getUrl().isEmpty() && credentials.getUrl().chars().noneMatch(Character::isWhitespace) &&
+                        credentials.getUsername() != null && !credentials.getUsername().isEmpty() && credentials.getUsername().chars().noneMatch(Character::isWhitespace) &&
+                        credentials.getPassword() != null && !credentials.getPassword().isEmpty() && credentials.getPassword().chars().noneMatch(Character::isWhitespace)
         ).toList();
     }
 
